@@ -8,94 +8,48 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
-
 body {
   font-family: 'Inter', sans-serif;
   background: linear-gradient(160deg, #e8752c 0%, #d4601a 30%, #b84a10 60%, #1a0800 100%);
   color: #fff;
-  transition: background 0.6s;
   overflow: hidden;
 }
 
-/* ===== MODES ===== */
+/* Modes */
 .edit-only { display: block; }
 body.live-mode .edit-only { display: none !important; }
 .live-only { display: none; }
 body.live-mode .live-only { display: block; }
 
-/* ===== VIEWS ===== */
+/* Views */
 .view { display: none; height: 100vh; }
 .view.active { display: flex; flex-direction: column; }
 
-/* ===== SHARED ===== */
-button {
-  font-family: inherit;
-}
-
-/* ========================================
-   VIEW: DEBATE (main projection view)
-   ======================================== */
-#debateView {
-  padding: 24px 40px;
-  gap: 20px;
-}
-
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.title {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.6rem;
-  font-weight: 900;
-}
-.header-right {
-  display: flex; align-items: center; gap: 20px;
-}
-.live-badge {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 0.75rem; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 2px;
-}
-.live-dot {
-  width: 10px; height: 10px;
-  background: #fff;
-  border-radius: 50%;
-  animation: pulse 1.5s ease-in-out infinite;
-}
+/* ===== DEBATE VIEW ===== */
+#debateView { padding: 24px 40px; gap: 20px; }
+header { display: flex; justify-content: space-between; align-items: center; }
+.title { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 900; }
+.header-right { display: flex; align-items: center; gap: 20px; }
+.live-badge { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; }
+.live-dot { width: 10px; height: 10px; background: #fff; border-radius: 50%; animation: pulse 1.5s ease-in-out infinite; }
 @keyframes pulse { 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }
-.round {
-  font-size: 0.8rem; font-weight: 600;
-  padding: 4px 12px;
-  border: 1.5px solid rgba(255,255,255,0.5);
-  border-radius: 20px;
-}
+.round { font-size: 0.8rem; font-weight: 600; padding: 4px 12px; border: 1.5px solid rgba(255,255,255,0.5); border-radius: 20px; }
 .ctrl-bar { display: flex; gap: 8px; }
-.ctrl-bar button, .btn-sm {
+.btn-sm, .ctrl-bar button {
   padding: 5px 12px; font-size: 0.7rem; font-weight: 600;
   background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.3);
-  color: #fff; border-radius: 4px; cursor: pointer; transition: background 0.2s;
+  color: #fff; border-radius: 4px; cursor: pointer; transition: background 0.2s; font-family: inherit;
 }
-.ctrl-bar button:hover, .btn-sm:hover { background: rgba(0,0,0,0.6); }
+.btn-sm:hover, .ctrl-bar button:hover { background: rgba(0,0,0,0.6); }
 
-/* Main grid */
-.debate-main {
-  flex: 1;
-  display: grid;
-  grid-template-columns: 1fr 2fr 1fr;
-  gap: 30px;
-  align-items: start;
-  overflow: hidden;
-}
+.debate-main { flex: 1; display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 30px; align-items: start; overflow: hidden; }
 
 /* Speakers */
 .speakers { padding-top: 10px; }
 .speaker {
-  padding: 10px 14px; margin-bottom: 6px;
-  border-radius: 6px; font-size: 1.1rem; font-weight: 500;
-  cursor: pointer; transition: all 0.2s;
-  border-left: 3px solid transparent; opacity: 0.6;
+  padding: 10px 14px; margin-bottom: 6px; border-radius: 6px;
+  font-size: 1.1rem; font-weight: 500; cursor: pointer;
+  border-left: 3px solid transparent; opacity: 0.6; transition: all 0.2s;
 }
 .speaker.active { opacity: 1; border-left-color: #fff; font-weight: 700; background: rgba(0,0,0,0.2); }
 .speaker.next { opacity: 0.85; border-left-color: rgba(255,255,255,0.4); }
@@ -104,15 +58,14 @@ header {
 .speaker-nav button {
   flex: 1; padding: 8px; font-size: 0.75rem; font-weight: 600;
   background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.2);
-  color: #fff; border-radius: 4px; cursor: pointer;
+  color: #fff; border-radius: 4px; cursor: pointer; font-family: inherit;
 }
 
 /* Center */
 .center { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 20px; }
 .timer {
   font-family: 'Inter', sans-serif; font-size: 8rem; font-weight: 800;
-  font-variant-numeric: tabular-nums; letter-spacing: -4px; line-height: 1;
-  transition: color 0.4s;
+  font-variant-numeric: tabular-nums; letter-spacing: -4px; line-height: 1; transition: color 0.4s;
 }
 .timer.green { color: #fff; }
 .timer.yellow { color: #ffe082; }
@@ -120,30 +73,19 @@ header {
 @keyframes blink { 0%,100%{ opacity:1; } 50%{ opacity:0.5; } }
 .timer-btns { display: flex; gap: 10px; }
 .timer-btns button {
-  padding: 10px 28px; font-size: 0.85rem; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 1px;
-  background: transparent; border: 2px solid rgba(255,255,255,0.6);
-  color: #fff; border-radius: 6px; cursor: pointer;
+  padding: 10px 28px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+  background: transparent; border: 2px solid rgba(255,255,255,0.6); color: #fff; border-radius: 6px; cursor: pointer; font-family: inherit;
 }
 .timer-btns button:hover { background: rgba(255,255,255,0.15); }
 .presets { display: flex; gap: 6px; }
 .presets button {
-  padding: 4px 12px; font-size: 0.7rem;
-  background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2);
-  color: #fff; border-radius: 3px; cursor: pointer;
+  padding: 4px 12px; font-size: 0.7rem; background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 3px; cursor: pointer; font-family: inherit;
 }
 .global-time { font-size: 0.8rem; opacity: 0.6; font-variant-numeric: tabular-nums; }
 .topic-display { max-width: 520px; }
-.topic-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.6rem; font-weight: 700; font-style: italic; line-height: 1.3;
-}
-.topic-info {
-  margin-top: 8px; font-size: 0.85rem; opacity: 0.7; line-height: 1.5;
-  max-height: 120px; overflow-y: auto;
-}
-.topic-info::-webkit-scrollbar { width: 3px; }
-.topic-info::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 3px; }
+.topic-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; font-style: italic; line-height: 1.3; }
+.topic-info { margin-top: 8px; font-size: 0.85rem; opacity: 0.7; line-height: 1.5; max-height: 120px; overflow-y: auto; }
 
 /* Rules */
 .rules { padding-top: 10px; font-size: 0.85rem; line-height: 1.7; opacity: 0.7; }
@@ -153,107 +95,82 @@ header {
 /* Footer */
 .debate-footer {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.15);
-  font-size: 0.8rem; opacity: 0.7;
+  padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.15); font-size: 0.8rem; opacity: 0.7;
 }
 .footer-left { font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
 .footer-center { font-style: italic; font-family: 'Playfair Display', serif; font-size: 0.9rem; }
 .footer-right { font-variant-numeric: tabular-nums; }
 
-/* ========================================
-   VIEW: TEMAS (topic editor)
-   ======================================== */
-#temasView {
-  padding: 30px 50px;
-  overflow-y: auto;
-}
-.temas-header {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 30px;
-}
-.temas-header h1 {
-  font-family: 'Playfair Display', serif;
-  font-size: 2rem; font-weight: 900;
-}
-.temas-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-  gap: 20px;
-}
+/* ===== TEMAS VIEW ===== */
+#temasView { padding: 30px 50px; overflow-y: auto; }
+.temas-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+.temas-header h1 { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 900; }
+.save-status { font-size: 0.75rem; opacity: 0.6; margin-left: 12px; }
+.temas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 20px; }
 .tema-card {
-  background: rgba(0,0,0,0.35);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 10px;
-  padding: 20px;
-  transition: border-color 0.2s;
+  background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px; padding: 20px; transition: border-color 0.2s;
 }
 .tema-card:hover { border-color: rgba(255,255,255,0.4); }
 .tema-card.active-tema { border-color: #fff; border-width: 2px; }
-.tema-card h3 {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.2rem; font-weight: 700; margin-bottom: 10px;
-}
-.tema-card label {
-  display: block; font-size: 0.65rem; font-weight: 600;
-  text-transform: uppercase; letter-spacing: 1px;
-  opacity: 0.5; margin-top: 10px; margin-bottom: 4px;
-}
+.tema-card h3 { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 10px; }
+.tema-card label { display: block; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; opacity: 0.5; margin-top: 10px; margin-bottom: 4px; }
 .tema-card input, .tema-card textarea {
-  width: 100%; padding: 8px 10px;
-  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 4px; color: #fff; font-family: inherit; font-size: 0.85rem;
+  width: 100%; padding: 8px 10px; background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12); border-radius: 4px; color: #fff; font-family: inherit; font-size: 0.85rem;
 }
 .tema-card textarea { min-height: 70px; resize: vertical; line-height: 1.5; }
 .tema-actions { display: flex; gap: 8px; margin-top: 12px; }
 .tema-actions button {
   padding: 6px 14px; font-size: 0.7rem; font-weight: 600;
   background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
-  color: #fff; border-radius: 4px; cursor: pointer;
+  color: #fff; border-radius: 4px; cursor: pointer; font-family: inherit;
 }
 .tema-actions button:hover { background: rgba(255,255,255,0.2); }
 .tema-actions button.btn-danger { border-color: rgba(255,80,80,0.4); }
 .tema-actions button.btn-danger:hover { background: rgba(255,80,80,0.2); }
 .add-tema-btn {
-  display: flex; align-items: center; justify-content: center;
-  min-height: 200px;
+  display: flex; align-items: center; justify-content: center; min-height: 200px;
   background: rgba(255,255,255,0.04); border: 2px dashed rgba(255,255,255,0.2);
-  border-radius: 10px; cursor: pointer; font-size: 1rem; opacity: 0.5;
-  transition: opacity 0.2s;
+  border-radius: 10px; cursor: pointer; font-size: 1rem; opacity: 0.5; transition: opacity 0.2s;
 }
 .add-tema-btn:hover { opacity: 0.8; }
 
-/* ===== MODAL (speakers/rules) ===== */
+/* ===== MODAL ===== */
 .modal-bg {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.8); z-index: 999;
-  justify-content: center; align-items: center;
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 999; justify-content: center; align-items: center;
 }
 .modal-bg.show { display: flex; }
 .modal {
-  background: #1a1015; color: #f0e8e0;
-  border-radius: 10px; padding: 28px;
+  background: #1a1015; color: #f0e8e0; border-radius: 10px; padding: 28px;
   width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto;
 }
 .modal h2 { font-family: 'Playfair Display', serif; margin-bottom: 16px; }
 .modal label { display: block; font-size: 0.75rem; font-weight: 600; margin-top: 12px; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; }
 .modal input, .modal textarea {
-  width: 100%; padding: 10px; margin-top: 4px;
-  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 4px; color: #fff; font-family: inherit; font-size: 0.9rem;
+  width: 100%; padding: 10px; margin-top: 4px; background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.15); border-radius: 4px; color: #fff; font-family: inherit; font-size: 0.9rem;
 }
 .modal textarea { min-height: 80px; resize: vertical; }
 .modal-btns { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
-.modal-btns button { padding: 8px 20px; font-size: 0.85rem; font-weight: 600; border: none; border-radius: 4px; cursor: pointer; }
+.modal-btns button { padding: 8px 20px; font-size: 0.85rem; font-weight: 600; border: none; border-radius: 4px; cursor: pointer; font-family: inherit; }
 .btn-save { background: #4caf50; color: #fff; }
 .btn-cancel { background: #444; color: #fff; }
 
-/* ===== HINT ===== */
+/* Hint */
 .hint { position: fixed; bottom: 6px; right: 12px; font-size: 0.6rem; opacity: 0.3; }
 body.live-mode .hint { display: none; }
+
+/* Loading */
+.loading { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); z-index: 9999; font-size: 1.2rem; }
+.loading.hidden { display: none; }
 </style>
 </head>
 <body>
 
-<!-- ==================== DEBATE VIEW ==================== -->
+<div class="loading" id="loading">Cargando...</div>
+
+<!-- ===== DEBATE VIEW ===== -->
 <div class="view active" id="debateView">
   <header>
     <div class="title" id="eventTitle">Un café por la democracia</div>
@@ -265,7 +182,7 @@ body.live-mode .hint { display: none; }
         <button onclick="openModal('speakers')">Panelistas</button>
         <button onclick="openModal('rules')">Reglas</button>
         <button onclick="cycleRound()">Ronda ↻</button>
-        <button onclick="toggleLive()" id="btnLive">▶ LIVE</button>
+        <button onclick="toggleLive()">▶ LIVE</button>
       </div>
       <div class="ctrl-bar live-only">
         <button onclick="toggleLive()">✕ Salir</button>
@@ -296,7 +213,7 @@ body.live-mode .hint { display: none; }
       </div>
       <div class="global-time">Total: <span id="globalTime">00:00:00</span></div>
       <div class="topic-display">
-        <div class="topic-title" id="topicTitle">¿Qué país queremos construir juntxs?</div>
+        <div class="topic-title" id="topicTitle">—</div>
         <div class="topic-info" id="topicInfo"></div>
       </div>
       <div class="edit-only" style="display:flex;gap:8px;">
@@ -305,14 +222,7 @@ body.live-mode .hint { display: none; }
       </div>
     </div>
 
-    <ul class="rules" id="rulesList">
-      <li>Máximo 3 minutos por intervención</li>
-      <li>Respetar turno de palabra</li>
-      <li>No interrumpir al orador</li>
-      <li>Réplica: 1 minuto máximo</li>
-      <li>Citar fuentes verificables</li>
-      <li>Lenguaje respetuoso</li>
-    </ul>
+    <ul class="rules" id="rulesList"></ul>
   </div>
 
   <div class="debate-footer">
@@ -322,11 +232,15 @@ body.live-mode .hint { display: none; }
   </div>
 </div>
 
-<!-- ==================== TEMAS VIEW ==================== -->
+<!-- ===== TEMAS VIEW ===== -->
 <div class="view" id="temasView">
   <div class="temas-header">
-    <h1>Temas del conversatorio</h1>
+    <div style="display:flex;align-items:baseline;gap:8px;">
+      <h1>Temas del conversatorio</h1>
+      <span class="save-status" id="saveStatus"></span>
+    </div>
     <div class="ctrl-bar">
+      <button onclick="saveAll()">💾 Guardar todo</button>
       <button onclick="showView('debate')">← Volver al debate</button>
     </div>
   </div>
@@ -348,47 +262,142 @@ body.live-mode .hint { display: none; }
 <div class="hint">[Espacio] Play/Pausa · [←→] Orador · [R] Ronda · [T] Tema · [L] Live</div>
 
 <script>
+// ===== SUPABASE CONFIG =====
+const SUPABASE_URL = 'https://subbsyrooygdevejvdlm.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1YmJzeXJvb3lnZGV2ZWp2ZGxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMDQ2MTQsImV4cCI6MjA5NjU4MDYxNH0.BT-tGx2-JRosfmNz9AKgVpzdNnvvPK5EzuJEi0EmCYI';
+
+const headers = {
+  'apikey': SUPABASE_KEY,
+  'Authorization': `Bearer ${SUPABASE_KEY}`,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=representation'
+};
+
+async function supaFetch(path, opts = {}) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { headers, ...opts });
+  if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+  return res.status === 204 ? null : res.json();
+}
+
 // ===== STATE =====
 const S = {
-  speakers: ['Gustavo Petro', 'María F. Cabal', 'Sergio Fajardo', 'Francia Márquez', 'Rodolfo Hernández'],
+  debateId: null,
+  speakers: [],
+  rules: [],
+  rounds: ['Ronda 1', 'Ronda 2', 'Debate libre', 'Cierre'],
+  topics: [],
   active: 0,
+  temaIdx: 0,
+  roundIdx: 0,
   total: 180,
   remaining: 180,
   running: false,
   interval: null,
   globalSec: 0,
   globalInt: null,
-  rounds: ['Ronda 1', 'Ronda 2', 'Ronda 3', 'Debate libre', 'Cierre'],
-  roundIdx: 0,
-  temas: [
-    {
-      title: 'Reforma política y sistema electoral',
-      context: 'Colombia tiene 16+ partidos registrados. La fragmentación dificulta gobernabilidad. Umbral electoral actual: 3%.',
-      questions: '¿Se necesita reducir el número de partidos?\n¿Listas cerradas o voto preferente?\n¿Financiación estatal o mixta?',
-      data: 'Abstencionismo 2022: 45%. Votos nulos: 1.9M. Costo campaña presidencial ~$50.000M COP.'
-    },
-    {
-      title: 'Paz y seguridad',
-      context: 'Acuerdo de 2016 con FARC. Negociaciones con ELN en curso. Aumento de disidencias en zonas PDET.',
-      questions: '¿Continuar negociaciones con ELN?\n¿Paz total es viable?\n¿Qué hacer con disidencias?',
-      data: 'Líderes sociales asesinados 2023: 180+. Hectáreas coca: 230.000. Municipios PDET: 170.'
-    },
-    {
-      title: 'Economía y desigualdad',
-      context: 'Gini: 0.54 (uno de los más altos de LATAM). Informalidad laboral: 58%. Deuda pública ~60% PIB.',
-      questions: '¿Reforma tributaria progresiva?\n¿Cómo reducir informalidad?\n¿Transición energética vs extractivismo?',
-      data: 'Desempleo jóvenes: 20%. Salario mínimo 2026: $1.400.000 COP. Pobreza monetaria: 36%.'
-    }
-  ],
-  temaIdx: 0,
   live: false
 };
+
+// ===== DATA LOADING =====
+async function loadData() {
+  try {
+    // Get or create debate
+    let debates = await supaFetch('debates?order=created_at.desc&limit=1');
+    let debate;
+    if (debates.length === 0) {
+      // Create first debate with defaults
+      const created = await supaFetch('debates', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: 'Un café por la democracia',
+          speakers: ['Panelista 1', 'Panelista 2', 'Panelista 3'],
+          rules: ['Máximo 3 minutos por intervención', 'Respetar turno de palabra', 'No interrumpir al orador', 'Réplica: 1 minuto máximo', 'Citar fuentes verificables', 'Lenguaje respetuoso'],
+          rounds: ['Ronda 1', 'Ronda 2', 'Debate libre', 'Cierre']
+        })
+      });
+      debate = created[0];
+    } else {
+      debate = debates[0];
+    }
+
+    S.debateId = debate.id;
+    S.speakers = debate.speakers || [];
+    S.rules = debate.rules || [];
+    S.rounds = debate.rounds || ['Ronda 1', 'Ronda 2', 'Debate libre', 'Cierre'];
+    document.getElementById('eventTitle').textContent = debate.title || 'Un café por la democracia';
+    document.getElementById('footerMsg').textContent = debate.footer_msg || '';
+
+    // Load topics
+    const topics = await supaFetch(`topics?debate_id=eq.${S.debateId}&order=position`);
+    S.topics = topics;
+    S.temaIdx = 0;
+
+    // Render everything
+    renderSpeakers();
+    renderRules();
+    renderCurrentTopic();
+    updateTimer();
+    document.getElementById('loading').classList.add('hidden');
+  } catch (e) {
+    console.error('Load error:', e);
+    document.getElementById('loading').textContent = 'Error cargando datos: ' + e.message;
+  }
+}
+
+// ===== SAVE =====
+async function saveAll() {
+  const status = document.getElementById('saveStatus');
+  status.textContent = 'Guardando...';
+  try {
+    // Save debate config
+    await supaFetch(`debates?id=eq.${S.debateId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        speakers: S.speakers,
+        rules: S.rules,
+        rounds: S.rounds,
+        updated_at: new Date().toISOString()
+      })
+    });
+
+    // Delete existing topics and re-insert
+    await supaFetch(`topics?debate_id=eq.${S.debateId}`, { method: 'DELETE', headers: { ...headers, 'Prefer': '' } });
+
+    if (S.topics.length > 0) {
+      await supaFetch('topics', {
+        method: 'POST',
+        body: JSON.stringify(S.topics.map((t, i) => ({
+          debate_id: S.debateId,
+          position: i,
+          title: t.title || '',
+          context: t.context || '',
+          questions: t.questions || '',
+          data: t.data || ''
+        })))
+      });
+    }
+
+    status.textContent = '✓ Guardado';
+    setTimeout(() => { status.textContent = ''; }, 3000);
+  } catch (e) {
+    status.textContent = '✕ Error: ' + e.message;
+    console.error(e);
+  }
+}
+
+// Auto-save on leaving temas view
+let saveTimeout;
+function debounceSave() {
+  clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(saveAll, 2000);
+}
 
 // ===== VIEWS =====
 function showView(name) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById(name + 'View').classList.add('active');
   if (name === 'temas') renderTemas();
+  if (name === 'debate') { renderCurrentTopic(); renderSpeakers(); }
 }
 
 // ===== SPEAKERS =====
@@ -404,6 +413,11 @@ function setSpeaker(i) { S.active = i; renderSpeakers(); }
 function nextSpeaker() { S.active = (S.active + 1) % S.speakers.length; renderSpeakers(); resetTimer(); }
 function prevSpeaker() { S.active = (S.active - 1 + S.speakers.length) % S.speakers.length; renderSpeakers(); resetTimer(); }
 
+// ===== RULES =====
+function renderRules() {
+  document.getElementById('rulesList').innerHTML = S.rules.map(r => `<li>${r}</li>`).join('');
+}
+
 // ===== TIMER =====
 function fmt(s) { return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0'); }
 function fmtG(s) { const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60; return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`; }
@@ -416,8 +430,7 @@ function updateTimer() {
 function toggleTimer() { S.running ? pause() : start(); }
 function start() {
   if (S.remaining <= 0) return;
-  S.running = true;
-  document.getElementById('btnToggle').textContent = 'Pausa';
+  S.running = true; document.getElementById('btnToggle').textContent = 'Pausa';
   S.interval = setInterval(() => { S.remaining--; updateTimer(); if (S.remaining <= 0) pause(); }, 1000);
   if (!S.globalInt) S.globalInt = setInterval(() => { S.globalSec++; document.getElementById('globalTime').textContent = fmtG(S.globalSec); }, 1000);
 }
@@ -428,29 +441,29 @@ function setPreset(sec) { S.total = sec; S.remaining = sec; pause(); updateTimer
 // ===== ROUND =====
 function cycleRound() { S.roundIdx = (S.roundIdx + 1) % S.rounds.length; document.getElementById('roundBadge').textContent = S.rounds[S.roundIdx]; }
 
-// ===== TEMAS =====
+// ===== TOPICS =====
 function renderCurrentTopic() {
-  const t = S.temas[S.temaIdx];
+  const t = S.topics[S.temaIdx];
   if (!t) { document.getElementById('topicTitle').textContent = '—'; document.getElementById('topicInfo').textContent = ''; return; }
   document.getElementById('topicTitle').textContent = t.title;
-  document.getElementById('topicInfo').textContent = t.context;
+  document.getElementById('topicInfo').textContent = t.context || '';
 }
-function nextTopic() { if (S.temas.length === 0) return; S.temaIdx = (S.temaIdx + 1) % S.temas.length; renderCurrentTopic(); }
-function prevTopic() { if (S.temas.length === 0) return; S.temaIdx = (S.temaIdx - 1 + S.temas.length) % S.temas.length; renderCurrentTopic(); }
+function nextTopic() { if (!S.topics.length) return; S.temaIdx = (S.temaIdx + 1) % S.topics.length; renderCurrentTopic(); }
+function prevTopic() { if (!S.topics.length) return; S.temaIdx = (S.temaIdx - 1 + S.topics.length) % S.topics.length; renderCurrentTopic(); }
 
 function renderTemas() {
   const grid = document.getElementById('temasGrid');
-  grid.innerHTML = S.temas.map((t, i) => `
+  grid.innerHTML = S.topics.map((t, i) => `
     <div class="tema-card ${i === S.temaIdx ? 'active-tema' : ''}">
       <h3>${i + 1}. ${t.title || 'Sin título'}</h3>
       <label>Título</label>
-      <input value="${esc(t.title)}" oninput="S.temas[${i}].title=this.value">
+      <input value="${esc(t.title)}" oninput="S.topics[${i}].title=this.value; debounceSave()">
       <label>Contexto / Información clave</label>
-      <textarea oninput="S.temas[${i}].context=this.value">${esc(t.context)}</textarea>
+      <textarea oninput="S.topics[${i}].context=this.value; debounceSave()">${esc(t.context)}</textarea>
       <label>Preguntas guía</label>
-      <textarea oninput="S.temas[${i}].questions=this.value">${esc(t.questions)}</textarea>
+      <textarea oninput="S.topics[${i}].questions=this.value; debounceSave()">${esc(t.questions)}</textarea>
       <label>Datos / Cifras relevantes</label>
-      <textarea oninput="S.temas[${i}].data=this.value">${esc(t.data)}</textarea>
+      <textarea oninput="S.topics[${i}].data=this.value; debounceSave()">${esc(t.data)}</textarea>
       <div class="tema-actions">
         <button onclick="setActiveTema(${i})">Usar en debate</button>
         <button class="btn-danger" onclick="removeTema(${i})">Eliminar</button>
@@ -458,17 +471,13 @@ function renderTemas() {
     </div>
   `).join('') + `<div class="add-tema-btn" onclick="addTema()">+ Agregar tema</div>`;
 }
-
-function esc(s) { return (s||'').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
-function addTema() { S.temas.push({ title: '', context: '', questions: '', data: '' }); renderTemas(); }
-function removeTema(i) { S.temas.splice(i, 1); if (S.temaIdx >= S.temas.length) S.temaIdx = Math.max(0, S.temas.length - 1); renderTemas(); renderCurrentTopic(); }
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function addTema() { S.topics.push({ title: '', context: '', questions: '', data: '' }); renderTemas(); debounceSave(); }
+function removeTema(i) { S.topics.splice(i, 1); if (S.temaIdx >= S.topics.length) S.temaIdx = Math.max(0, S.topics.length - 1); renderTemas(); renderCurrentTopic(); debounceSave(); }
 function setActiveTema(i) { S.temaIdx = i; renderCurrentTopic(); renderTemas(); }
 
 // ===== LIVE MODE =====
-function toggleLive() {
-  S.live = !S.live;
-  document.body.classList.toggle('live-mode', S.live);
-}
+function toggleLive() { S.live = !S.live; document.body.classList.toggle('live-mode', S.live); }
 
 // ===== MODAL =====
 function openModal(type) {
@@ -479,16 +488,11 @@ function openModal(type) {
   if (type === 'speakers') {
     title.textContent = 'Panelistas';
     body.innerHTML = `<label>Un nombre por línea</label><textarea id="ed">${S.speakers.join('\n')}</textarea>`;
-    save.onclick = () => { S.speakers = document.getElementById('ed').value.trim().split('\n').filter(Boolean); S.active = 0; renderSpeakers(); closeModal(); };
+    save.onclick = () => { S.speakers = document.getElementById('ed').value.trim().split('\n').filter(Boolean); S.active = 0; renderSpeakers(); saveAll(); closeModal(); };
   } else if (type === 'rules') {
-    const rules = Array.from(document.querySelectorAll('#rulesList li')).map(li => li.textContent);
-    body.innerHTML = `<label>Reglas (una por línea)</label><textarea id="ed">${rules.join('\n')}</textarea>`;
     title.textContent = 'Reglas';
-    save.onclick = () => {
-      const items = document.getElementById('ed').value.trim().split('\n').filter(Boolean);
-      document.getElementById('rulesList').innerHTML = items.map(r => `<li>${r}</li>`).join('');
-      closeModal();
-    };
+    body.innerHTML = `<label>Reglas (una por línea)</label><textarea id="ed">${S.rules.join('\n')}</textarea>`;
+    save.onclick = () => { S.rules = document.getElementById('ed').value.trim().split('\n').filter(Boolean); renderRules(); saveAll(); closeModal(); };
   }
 }
 function closeModal() { document.getElementById('modalBg').classList.remove('show'); }
@@ -510,9 +514,7 @@ document.addEventListener('keydown', e => {
 setInterval(() => { document.getElementById('clock').textContent = new Date().toLocaleTimeString('es-CO', { hour:'2-digit', minute:'2-digit' }); }, 1000);
 
 // ===== INIT =====
-renderSpeakers();
-updateTimer();
-renderCurrentTopic();
+loadData();
 </script>
 </body>
 </html>
