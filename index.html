@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Un café por la democracia</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(160deg, #e8752c 0%, #d4601a 30%, #b84a10 60%, #1a0800 100%);
+  color: #fff;
+  transition: background 0.6s;
+  overflow: hidden;
+}
+
+/* ===== MODES ===== */
+.edit-only { display: block; }
+body.live-mode .edit-only { display: none !important; }
+.live-only { display: none; }
+body.live-mode .live-only { display: block; }
+
+/* ===== VIEWS ===== */
+.view { display: none; height: 100vh; }
+.view.active { display: flex; flex-direction: column; }
+
+/* ===== SHARED ===== */
+button {
+  font-family: inherit;
+}
+
+/* ========================================
+   VIEW: DEBATE (main projection view)
+   ======================================== */
+#debateView {
+  padding: 24px 40px;
+  gap: 20px;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  font-weight: 900;
+}
+.header-right {
+  display: flex; align-items: center; gap: 20px;
+}
+.live-badge {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.75rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 2px;
+}
+.live-dot {
+  width: 10px; height: 10px;
+  background: #fff;
+  border-radius: 50%;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }
+.round {
+  font-size: 0.8rem; font-weight: 600;
+  padding: 4px 12px;
+  border: 1.5px solid rgba(255,255,255,0.5);
+  border-radius: 20px;
+}
+.ctrl-bar { display: flex; gap: 8px; }
+.ctrl-bar button, .btn-sm {
+  padding: 5px 12px; font-size: 0.7rem; font-weight: 600;
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.3);
+  color: #fff; border-radius: 4px; cursor: pointer; transition: background 0.2s;
+}
+.ctrl-bar button:hover, .btn-sm:hover { background: rgba(0,0,0,0.6); }
+
+/* Main grid */
+.debate-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 30px;
+  align-items: start;
+  overflow: hidden;
+}
+
+/* Speakers */
+.speakers { padding-top: 10px; }
+.speaker {
+  padding: 10px 14px; margin-bottom: 6px;
+  border-radius: 6px; font-size: 1.1rem; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+  border-left: 3px solid transparent; opacity: 0.6;
+}
+.speaker.active { opacity: 1; border-left-color: #fff; font-weight: 700; background: rgba(0,0,0,0.2); }
+.speaker.next { opacity: 0.85; border-left-color: rgba(255,255,255,0.4); }
+.speaker-tag { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; margin-left: 8px; }
+.speaker-nav { margin-top: 12px; display: flex; gap: 6px; }
+.speaker-nav button {
+  flex: 1; padding: 8px; font-size: 0.75rem; font-weight: 600;
+  background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.2);
+  color: #fff; border-radius: 4px; cursor: pointer;
+}
+
+/* Center */
+.center { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 20px; }
+.timer {
+  font-family: 'Inter', sans-serif; font-size: 8rem; font-weight: 800;
+  font-variant-numeric: tabular-nums; letter-spacing: -4px; line-height: 1;
+  transition: color 0.4s;
+}
+.timer.green { color: #fff; }
+.timer.yellow { color: #ffe082; }
+.timer.red { color: #1a1a1a; animation: blink 0.8s ease-in-out infinite; }
+@keyframes blink { 0%,100%{ opacity:1; } 50%{ opacity:0.5; } }
+.timer-btns { display: flex; gap: 10px; }
+.timer-btns button {
+  padding: 10px 28px; font-size: 0.85rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+  background: transparent; border: 2px solid rgba(255,255,255,0.6);
+  color: #fff; border-radius: 6px; cursor: pointer;
+}
+.timer-btns button:hover { background: rgba(255,255,255,0.15); }
+.presets { display: flex; gap: 6px; }
+.presets button {
+  padding: 4px 12px; font-size: 0.7rem;
+  background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2);
+  color: #fff; border-radius: 3px; cursor: pointer;
+}
+.global-time { font-size: 0.8rem; opacity: 0.6; font-variant-numeric: tabular-nums; }
+.topic-display { max-width: 520px; }
+.topic-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem; font-weight: 700; font-style: italic; line-height: 1.3;
+}
+.topic-info {
+  margin-top: 8px; font-size: 0.85rem; opacity: 0.7; line-height: 1.5;
+  max-height: 120px; overflow-y: auto;
+}
+.topic-info::-webkit-scrollbar { width: 3px; }
+.topic-info::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 3px; }
+
+/* Rules */
+.rules { padding-top: 10px; font-size: 0.85rem; line-height: 1.7; opacity: 0.7; }
+.rules li { list-style: none; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.rules li::before { content: '— '; opacity: 0.5; }
+
+/* Footer */
+.debate-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.15);
+  font-size: 0.8rem; opacity: 0.7;
+}
+.footer-left { font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+.footer-center { font-style: italic; font-family: 'Playfair Display', serif; font-size: 0.9rem; }
+.footer-right { font-variant-numeric: tabular-nums; }
+
+/* ========================================
+   VIEW: TEMAS (topic editor)
+   ======================================== */
+#temasView {
+  padding: 30px 50px;
+  overflow-y: auto;
+}
+.temas-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 30px;
+}
+.temas-header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem; font-weight: 900;
+}
+.temas-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 20px;
+}
+.tema-card {
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px;
+  padding: 20px;
+  transition: border-color 0.2s;
+}
+.tema-card:hover { border-color: rgba(255,255,255,0.4); }
+.tema-card.active-tema { border-color: #fff; border-width: 2px; }
+.tema-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.2rem; font-weight: 700; margin-bottom: 10px;
+}
+.tema-card label {
+  display: block; font-size: 0.65rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 1px;
+  opacity: 0.5; margin-top: 10px; margin-bottom: 4px;
+}
+.tema-card input, .tema-card textarea {
+  width: 100%; padding: 8px 10px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 4px; color: #fff; font-family: inherit; font-size: 0.85rem;
+}
+.tema-card textarea { min-height: 70px; resize: vertical; line-height: 1.5; }
+.tema-actions { display: flex; gap: 8px; margin-top: 12px; }
+.tema-actions button {
+  padding: 6px 14px; font-size: 0.7rem; font-weight: 600;
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+  color: #fff; border-radius: 4px; cursor: pointer;
+}
+.tema-actions button:hover { background: rgba(255,255,255,0.2); }
+.tema-actions button.btn-danger { border-color: rgba(255,80,80,0.4); }
+.tema-actions button.btn-danger:hover { background: rgba(255,80,80,0.2); }
+.add-tema-btn {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 200px;
+  background: rgba(255,255,255,0.04); border: 2px dashed rgba(255,255,255,0.2);
+  border-radius: 10px; cursor: pointer; font-size: 1rem; opacity: 0.5;
+  transition: opacity 0.2s;
+}
+.add-tema-btn:hover { opacity: 0.8; }
+
+/* ===== MODAL (speakers/rules) ===== */
+.modal-bg {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.8); z-index: 999;
+  justify-content: center; align-items: center;
+}
+.modal-bg.show { display: flex; }
+.modal {
+  background: #1a1015; color: #f0e8e0;
+  border-radius: 10px; padding: 28px;
+  width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto;
+}
+.modal h2 { font-family: 'Playfair Display', serif; margin-bottom: 16px; }
+.modal label { display: block; font-size: 0.75rem; font-weight: 600; margin-top: 12px; opacity: 0.6; text-transform: uppercase; letter-spacing: 1px; }
+.modal input, .modal textarea {
+  width: 100%; padding: 10px; margin-top: 4px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 4px; color: #fff; font-family: inherit; font-size: 0.9rem;
+}
+.modal textarea { min-height: 80px; resize: vertical; }
+.modal-btns { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+.modal-btns button { padding: 8px 20px; font-size: 0.85rem; font-weight: 600; border: none; border-radius: 4px; cursor: pointer; }
+.btn-save { background: #4caf50; color: #fff; }
+.btn-cancel { background: #444; color: #fff; }
+
+/* ===== HINT ===== */
+.hint { position: fixed; bottom: 6px; right: 12px; font-size: 0.6rem; opacity: 0.3; }
+body.live-mode .hint { display: none; }
+</style>
+</head>
+<body>
+
+<!-- ==================== DEBATE VIEW ==================== -->
+<div class="view active" id="debateView">
+  <header>
+    <div class="title" id="eventTitle">Un café por la democracia</div>
+    <div class="header-right">
+      <div class="live-badge"><div class="live-dot"></div> EN VIVO</div>
+      <div class="round" id="roundBadge">Ronda 1</div>
+      <div class="ctrl-bar edit-only">
+        <button onclick="showView('temas')">Temas</button>
+        <button onclick="openModal('speakers')">Panelistas</button>
+        <button onclick="openModal('rules')">Reglas</button>
+        <button onclick="cycleRound()">Ronda ↻</button>
+        <button onclick="toggleLive()" id="btnLive">▶ LIVE</button>
+      </div>
+      <div class="ctrl-bar live-only">
+        <button onclick="toggleLive()">✕ Salir</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="debate-main">
+    <div class="speakers">
+      <div id="speakerList"></div>
+      <div class="speaker-nav edit-only">
+        <button onclick="prevSpeaker()">← Anterior</button>
+        <button onclick="nextSpeaker()">Siguiente →</button>
+      </div>
+    </div>
+
+    <div class="center">
+      <div class="timer green" id="timer">03:00</div>
+      <div class="timer-btns">
+        <button onclick="toggleTimer()" id="btnToggle">Iniciar</button>
+        <button onclick="resetTimer()">Reset</button>
+      </div>
+      <div class="presets edit-only">
+        <button onclick="setPreset(60)">1m</button>
+        <button onclick="setPreset(120)">2m</button>
+        <button onclick="setPreset(180)">3m</button>
+        <button onclick="setPreset(300)">5m</button>
+      </div>
+      <div class="global-time">Total: <span id="globalTime">00:00:00</span></div>
+      <div class="topic-display">
+        <div class="topic-title" id="topicTitle">¿Qué país queremos construir juntxs?</div>
+        <div class="topic-info" id="topicInfo"></div>
+      </div>
+      <div class="edit-only" style="display:flex;gap:8px;">
+        <button class="btn-sm" onclick="prevTopic()">← Tema</button>
+        <button class="btn-sm" onclick="nextTopic()">Tema →</button>
+      </div>
+    </div>
+
+    <ul class="rules" id="rulesList">
+      <li>Máximo 3 minutos por intervención</li>
+      <li>Respetar turno de palabra</li>
+      <li>No interrumpir al orador</li>
+      <li>Réplica: 1 minuto máximo</li>
+      <li>Citar fuentes verificables</li>
+      <li>Lenguaje respetuoso</li>
+    </ul>
+  </div>
+
+  <div class="debate-footer">
+    <div class="footer-left">Plural × Sur</div>
+    <div class="footer-center" id="footerMsg">Conversatorio pre-electoral — Colombia 2026</div>
+    <div class="footer-right" id="clock"></div>
+  </div>
+</div>
+
+<!-- ==================== TEMAS VIEW ==================== -->
+<div class="view" id="temasView">
+  <div class="temas-header">
+    <h1>Temas del conversatorio</h1>
+    <div class="ctrl-bar">
+      <button onclick="showView('debate')">← Volver al debate</button>
+    </div>
+  </div>
+  <div class="temas-grid" id="temasGrid"></div>
+</div>
+
+<!-- ===== MODAL ===== -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h2 id="modalTitle">Editar</h2>
+    <div id="modalBody"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-save" id="btnSave">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="hint">[Espacio] Play/Pausa · [←→] Orador · [R] Ronda · [T] Tema · [L] Live</div>
+
+<script>
+// ===== STATE =====
+const S = {
+  speakers: ['Gustavo Petro', 'María F. Cabal', 'Sergio Fajardo', 'Francia Márquez', 'Rodolfo Hernández'],
+  active: 0,
+  total: 180,
+  remaining: 180,
+  running: false,
+  interval: null,
+  globalSec: 0,
+  globalInt: null,
+  rounds: ['Ronda 1', 'Ronda 2', 'Ronda 3', 'Debate libre', 'Cierre'],
+  roundIdx: 0,
+  temas: [
+    {
+      title: 'Reforma política y sistema electoral',
+      context: 'Colombia tiene 16+ partidos registrados. La fragmentación dificulta gobernabilidad. Umbral electoral actual: 3%.',
+      questions: '¿Se necesita reducir el número de partidos?\n¿Listas cerradas o voto preferente?\n¿Financiación estatal o mixta?',
+      data: 'Abstencionismo 2022: 45%. Votos nulos: 1.9M. Costo campaña presidencial ~$50.000M COP.'
+    },
+    {
+      title: 'Paz y seguridad',
+      context: 'Acuerdo de 2016 con FARC. Negociaciones con ELN en curso. Aumento de disidencias en zonas PDET.',
+      questions: '¿Continuar negociaciones con ELN?\n¿Paz total es viable?\n¿Qué hacer con disidencias?',
+      data: 'Líderes sociales asesinados 2023: 180+. Hectáreas coca: 230.000. Municipios PDET: 170.'
+    },
+    {
+      title: 'Economía y desigualdad',
+      context: 'Gini: 0.54 (uno de los más altos de LATAM). Informalidad laboral: 58%. Deuda pública ~60% PIB.',
+      questions: '¿Reforma tributaria progresiva?\n¿Cómo reducir informalidad?\n¿Transición energética vs extractivismo?',
+      data: 'Desempleo jóvenes: 20%. Salario mínimo 2026: $1.400.000 COP. Pobreza monetaria: 36%.'
+    }
+  ],
+  temaIdx: 0,
+  live: false
+};
+
+// ===== VIEWS =====
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(name + 'View').classList.add('active');
+  if (name === 'temas') renderTemas();
+}
+
+// ===== SPEAKERS =====
+function renderSpeakers() {
+  document.getElementById('speakerList').innerHTML = S.speakers.map((name, i) => {
+    let cls = 'speaker', tag = '';
+    if (i === S.active) { cls += ' active'; tag = '<span class="speaker-tag">en turno</span>'; }
+    else if (i === (S.active + 1) % S.speakers.length) { cls += ' next'; tag = '<span class="speaker-tag">siguiente</span>'; }
+    return `<div class="${cls}" onclick="setSpeaker(${i})">${name}${tag}</div>`;
+  }).join('');
+}
+function setSpeaker(i) { S.active = i; renderSpeakers(); }
+function nextSpeaker() { S.active = (S.active + 1) % S.speakers.length; renderSpeakers(); resetTimer(); }
+function prevSpeaker() { S.active = (S.active - 1 + S.speakers.length) % S.speakers.length; renderSpeakers(); resetTimer(); }
+
+// ===== TIMER =====
+function fmt(s) { return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0'); }
+function fmtG(s) { const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60; return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`; }
+function updateTimer() {
+  const el = document.getElementById('timer');
+  el.textContent = fmt(S.remaining);
+  const pct = S.remaining / S.total;
+  el.className = 'timer ' + (pct > 0.5 ? 'green' : pct > 0.2 ? 'yellow' : 'red');
+}
+function toggleTimer() { S.running ? pause() : start(); }
+function start() {
+  if (S.remaining <= 0) return;
+  S.running = true;
+  document.getElementById('btnToggle').textContent = 'Pausa';
+  S.interval = setInterval(() => { S.remaining--; updateTimer(); if (S.remaining <= 0) pause(); }, 1000);
+  if (!S.globalInt) S.globalInt = setInterval(() => { S.globalSec++; document.getElementById('globalTime').textContent = fmtG(S.globalSec); }, 1000);
+}
+function pause() { S.running = false; document.getElementById('btnToggle').textContent = 'Iniciar'; clearInterval(S.interval); S.interval = null; }
+function resetTimer() { pause(); S.remaining = S.total; updateTimer(); }
+function setPreset(sec) { S.total = sec; S.remaining = sec; pause(); updateTimer(); }
+
+// ===== ROUND =====
+function cycleRound() { S.roundIdx = (S.roundIdx + 1) % S.rounds.length; document.getElementById('roundBadge').textContent = S.rounds[S.roundIdx]; }
+
+// ===== TEMAS =====
+function renderCurrentTopic() {
+  const t = S.temas[S.temaIdx];
+  if (!t) { document.getElementById('topicTitle').textContent = '—'; document.getElementById('topicInfo').textContent = ''; return; }
+  document.getElementById('topicTitle').textContent = t.title;
+  document.getElementById('topicInfo').textContent = t.context;
+}
+function nextTopic() { if (S.temas.length === 0) return; S.temaIdx = (S.temaIdx + 1) % S.temas.length; renderCurrentTopic(); }
+function prevTopic() { if (S.temas.length === 0) return; S.temaIdx = (S.temaIdx - 1 + S.temas.length) % S.temas.length; renderCurrentTopic(); }
+
+function renderTemas() {
+  const grid = document.getElementById('temasGrid');
+  grid.innerHTML = S.temas.map((t, i) => `
+    <div class="tema-card ${i === S.temaIdx ? 'active-tema' : ''}">
+      <h3>${i + 1}. ${t.title || 'Sin título'}</h3>
+      <label>Título</label>
+      <input value="${esc(t.title)}" oninput="S.temas[${i}].title=this.value">
+      <label>Contexto / Información clave</label>
+      <textarea oninput="S.temas[${i}].context=this.value">${esc(t.context)}</textarea>
+      <label>Preguntas guía</label>
+      <textarea oninput="S.temas[${i}].questions=this.value">${esc(t.questions)}</textarea>
+      <label>Datos / Cifras relevantes</label>
+      <textarea oninput="S.temas[${i}].data=this.value">${esc(t.data)}</textarea>
+      <div class="tema-actions">
+        <button onclick="setActiveTema(${i})">Usar en debate</button>
+        <button class="btn-danger" onclick="removeTema(${i})">Eliminar</button>
+      </div>
+    </div>
+  `).join('') + `<div class="add-tema-btn" onclick="addTema()">+ Agregar tema</div>`;
+}
+
+function esc(s) { return (s||'').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+function addTema() { S.temas.push({ title: '', context: '', questions: '', data: '' }); renderTemas(); }
+function removeTema(i) { S.temas.splice(i, 1); if (S.temaIdx >= S.temas.length) S.temaIdx = Math.max(0, S.temas.length - 1); renderTemas(); renderCurrentTopic(); }
+function setActiveTema(i) { S.temaIdx = i; renderCurrentTopic(); renderTemas(); }
+
+// ===== LIVE MODE =====
+function toggleLive() {
+  S.live = !S.live;
+  document.body.classList.toggle('live-mode', S.live);
+}
+
+// ===== MODAL =====
+function openModal(type) {
+  document.getElementById('modalBg').classList.add('show');
+  const body = document.getElementById('modalBody');
+  const title = document.getElementById('modalTitle');
+  const save = document.getElementById('btnSave');
+  if (type === 'speakers') {
+    title.textContent = 'Panelistas';
+    body.innerHTML = `<label>Un nombre por línea</label><textarea id="ed">${S.speakers.join('\n')}</textarea>`;
+    save.onclick = () => { S.speakers = document.getElementById('ed').value.trim().split('\n').filter(Boolean); S.active = 0; renderSpeakers(); closeModal(); };
+  } else if (type === 'rules') {
+    const rules = Array.from(document.querySelectorAll('#rulesList li')).map(li => li.textContent);
+    body.innerHTML = `<label>Reglas (una por línea)</label><textarea id="ed">${rules.join('\n')}</textarea>`;
+    title.textContent = 'Reglas';
+    save.onclick = () => {
+      const items = document.getElementById('ed').value.trim().split('\n').filter(Boolean);
+      document.getElementById('rulesList').innerHTML = items.map(r => `<li>${r}</li>`).join('');
+      closeModal();
+    };
+  }
+}
+function closeModal() { document.getElementById('modalBg').classList.remove('show'); }
+
+// ===== KEYBOARD =====
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  switch(e.key) {
+    case ' ': e.preventDefault(); toggleTimer(); break;
+    case 'ArrowRight': nextSpeaker(); break;
+    case 'ArrowLeft': prevSpeaker(); break;
+    case 'r': case 'R': cycleRound(); break;
+    case 't': case 'T': nextTopic(); break;
+    case 'l': case 'L': toggleLive(); break;
+  }
+});
+
+// ===== CLOCK =====
+setInterval(() => { document.getElementById('clock').textContent = new Date().toLocaleTimeString('es-CO', { hour:'2-digit', minute:'2-digit' }); }, 1000);
+
+// ===== INIT =====
+renderSpeakers();
+updateTimer();
+renderCurrentTopic();
+</script>
+</body>
+</html>
