@@ -12,7 +12,7 @@ body {
   font-family: 'Inter', sans-serif;
   background: linear-gradient(160deg, #e8752c 0%, #d4601a 30%, #b84a10 60%, #1a0800 100%);
   color: #fff;
-  overflow: hidden;
+  overflow: auto;
 }
 
 /* Modes */
@@ -42,7 +42,7 @@ header { display: flex; justify-content: space-between; align-items: center; }
 }
 .btn-sm:hover, .ctrl-bar button:hover { background: rgba(0,0,0,0.6); }
 
-.debate-main { flex: 1; display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 30px; align-items: start; overflow: hidden; }
+.debate-main { flex: 1; display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 30px; align-items: start; overflow-y: auto; }
 
 /* Speakers */
 .speakers { padding-top: 10px; }
@@ -85,7 +85,7 @@ header { display: flex; justify-content: space-between; align-items: center; }
 .global-time { font-size: 0.8rem; opacity: 0.6; font-variant-numeric: tabular-nums; }
 .topic-display { max-width: 520px; }
 .topic-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; font-style: italic; line-height: 1.3; }
-.topic-info { margin-top: 8px; font-size: 0.85rem; opacity: 0.7; line-height: 1.5; max-height: 120px; overflow-y: auto; }
+.topic-info { margin-top: 8px; font-size: 0.85rem; opacity: 0.7; line-height: 1.5; }
 
 /* Rules */
 .rules { padding-top: 10px; font-size: 0.85rem; line-height: 1.7; opacity: 0.7; }
