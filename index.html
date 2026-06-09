@@ -161,6 +161,38 @@ header { display: flex; justify-content: space-between; align-items: center; }
 .hint { position: fixed; bottom: 6px; right: 12px; font-size: 0.6rem; opacity: 0.3; }
 body.live-mode .hint { display: none; }
 
+/* Login */
+.login-screen {
+  position: fixed; inset: 0; z-index: 10000;
+  display: flex; align-items: center; justify-content: center; flex-direction: column;
+  background: linear-gradient(160deg, #e8752c 0%, #d4601a 30%, #b84a10 60%, #1a0800 100%);
+}
+.login-screen.hidden { display: none; }
+.login-box {
+  text-align: center; max-width: 360px; width: 90%;
+}
+.login-box h1 {
+  font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 900;
+  margin-bottom: 8px;
+}
+.login-box p { font-size: 0.85rem; opacity: 0.7; margin-bottom: 24px; }
+.login-box input {
+  width: 100%; padding: 14px 18px; font-size: 1rem;
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 6px; color: #fff; font-family: inherit; text-align: center;
+  letter-spacing: 2px;
+}
+.login-box input::placeholder { color: rgba(255,255,255,0.4); letter-spacing: 0; }
+.login-box input:focus { outline: none; border-color: #fff; }
+.login-box button {
+  margin-top: 14px; padding: 12px 32px; font-size: 0.9rem; font-weight: 700;
+  background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.6);
+  color: #fff; border-radius: 6px; cursor: pointer; font-family: inherit;
+  text-transform: uppercase; letter-spacing: 1px; transition: background 0.2s;
+}
+.login-box button:hover { background: rgba(255,255,255,0.25); }
+.login-error { margin-top: 12px; font-size: 0.8rem; color: #ffcdd2; display: none; }
+
 /* Loading */
 .loading { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); z-index: 9999; font-size: 1.2rem; }
 .loading.hidden { display: none; }
@@ -168,7 +200,18 @@ body.live-mode .hint { display: none; }
 </head>
 <body>
 
-<div class="loading" id="loading">Cargando...</div>
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <h1>Un café por la democracia</h1>
+    <p>Acceso para moderadores</p>
+    <input type="password" id="loginPass" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="loginError">Contraseña incorrecta</div>
+  </div>
+</div>
+
+<div class="loading hidden" id="loading">Cargando...</div>
 
 <!-- ===== DEBATE VIEW ===== -->
 <div class="view active" id="debateView">
@@ -518,8 +561,37 @@ document.addEventListener('keydown', e => {
 // ===== CLOCK =====
 setInterval(() => { document.getElementById('clock').textContent = new Date().toLocaleTimeString('es-CO', { hour:'2-digit', minute:'2-digit' }); }, 1000);
 
+// ===== LOGIN =====
+async function doLogin() {
+  const pass = document.getElementById('loginPass').value;
+  const errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+
+  try {
+    const res = await supaFetch("settings?key=eq.moderator_password&select=value");
+    if (res.length === 0) { errEl.textContent = 'No hay contraseña configurada'; errEl.style.display = 'block'; return; }
+    if (pass === res[0].value) {
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('loading').classList.remove('hidden');
+      sessionStorage.setItem('cafe_auth', '1');
+      loadData();
+    } else {
+      errEl.textContent = 'Contraseña incorrecta';
+      errEl.style.display = 'block';
+    }
+  } catch (e) {
+    errEl.textContent = 'Error de conexión';
+    errEl.style.display = 'block';
+  }
+}
+
 // ===== INIT =====
-loadData();
+// Auto-login if session is still valid
+if (sessionStorage.getItem('cafe_auth') === '1') {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('loading').classList.remove('hidden');
+  loadData();
+}
 </script>
 </body>
 </html>
