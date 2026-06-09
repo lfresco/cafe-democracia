@@ -196,9 +196,31 @@ body.live-mode .hint { display: none; }
 /* Loading */
 .loading { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); z-index: 9999; font-size: 1.2rem; }
 .loading.hidden { display: none; }
+
+/* Custom background */
+.custom-bg {
+  position: fixed; inset: 0; z-index: -1;
+  background-size: cover; background-position: center; background-repeat: no-repeat;
+}
+
+/* Design modal extras */
+.color-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.color-row input[type="color"] { width: 50px; height: 36px; border: none; border-radius: 4px; cursor: pointer; background: none; }
+.color-row span { font-size: 0.8rem; opacity: 0.7; }
+.upload-area {
+  margin-top: 8px; padding: 20px; text-align: center;
+  border: 2px dashed rgba(255,255,255,0.3); border-radius: 8px; cursor: pointer;
+  transition: border-color 0.2s;
+}
+.upload-area:hover { border-color: rgba(255,255,255,0.6); }
+.upload-area input { display: none; }
+.upload-preview { max-width: 100%; max-height: 150px; margin-top: 10px; border-radius: 4px; }
 </style>
 </head>
 <body>
+
+<!-- CUSTOM BACKGROUND -->
+<div class="custom-bg" id="customBg"></div>
 
 <!-- LOGIN SCREEN -->
 <div class="login-screen" id="loginScreen">
@@ -224,6 +246,7 @@ body.live-mode .hint { display: none; }
         <button onclick="showView('temas')">Temas</button>
         <button onclick="openModal('speakers')">Panelistas</button>
         <button onclick="openModal('rules')">Reglas</button>
+        <button onclick="openModal('design')">🎨 Diseño</button>
         <button onclick="cycleRound()">Ronda ↻</button>
         <button onclick="toggleLive()">▶ LIVE</button>
       </div>
@@ -338,7 +361,8 @@ const S = {
   interval: null,
   globalSec: 0,
   globalInt: null,
-  live: false
+  live: false,
+  design: { bgColor1: '#e8752c', bgColor2: '#1a0800', textColor: '#ffffff', bgImage: '', overlay: 0 }
 };
 
 // ===== DATA LOADING =====
@@ -380,6 +404,7 @@ async function loadData() {
     renderRules();
     renderCurrentTopic();
     updateTimer();
+    await loadDesign();
     document.getElementById('loading').classList.add('hidden');
   } catch (e) {
     console.error('Load error:', e);
@@ -541,9 +566,107 @@ function openModal(type) {
     title.textContent = 'Reglas';
     body.innerHTML = `<label>Reglas (una por línea)</label><textarea id="ed">${S.rules.join('\n')}</textarea>`;
     save.onclick = () => { S.rules = document.getElementById('ed').value.trim().split('\n').filter(Boolean); renderRules(); saveAll(); closeModal(); };
+  } else if (type === 'design') {
+    title.textContent = 'Diseño';
+    const d = S.design;
+    body.innerHTML = `
+      <label>Imagen de fondo (desde Canva u otro diseño)</label>
+      <div class="upload-area" onclick="document.getElementById('bgFile').click()">
+        <input type="file" id="bgFile" accept="image/*" onchange="handleBgUpload(this)">
+        <span>Click para subir imagen</span>
+        ${d.bgImage ? `<br><img class="upload-preview" src="${d.bgImage}">` : ''}
+      </div>
+      ${d.bgImage ? `<button class="btn-sm" style="margin-top:8px;" onclick="removeBgImage()">Quitar imagen</button>` : ''}
+      <label>Color de fondo (si no hay imagen)</label>
+      <div class="color-row">
+        <input type="color" id="colBg1" value="${d.bgColor1 || '#e8752c'}">
+        <span>Inicio gradiente</span>
+        <input type="color" id="colBg2" value="${d.bgColor2 || '#1a0800'}">
+        <span>Final gradiente</span>
+      </div>
+      <label>Color del texto</label>
+      <div class="color-row">
+        <input type="color" id="colText" value="${d.textColor || '#ffffff'}">
+        <span>Principal</span>
+      </div>
+      <label>Opacidad del fondo sobre imagen (0-100%)</label>
+      <input type="range" id="bgOverlay" min="0" max="100" value="${d.overlay || 0}" style="width:100%;margin-top:8px;">
+    `;
+    save.onclick = () => {
+      S.design.bgColor1 = document.getElementById('colBg1').value;
+      S.design.bgColor2 = document.getElementById('colBg2').value;
+      S.design.textColor = document.getElementById('colText').value;
+      S.design.overlay = document.getElementById('bgOverlay').value;
+      applyDesign();
+      saveDesign();
+      closeModal();
+    };
   }
 }
 function closeModal() { document.getElementById('modalBg').classList.remove('show'); }
+
+// ===== DESIGN =====
+async function handleBgUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const ext = file.name.split('.').pop();
+  const path = `bg-${Date.now()}.${ext}`;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/assets/${path}`, {
+      method: 'POST',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': file.type },
+      body: file
+    });
+    if (!res.ok) throw new Error(await res.text());
+    S.design.bgImage = `${SUPABASE_URL}/storage/v1/object/public/assets/${path}`;
+    applyDesign();
+    saveDesign();
+    openModal('design'); // refresh modal
+  } catch (e) { alert('Error subiendo: ' + e.message); }
+}
+
+function removeBgImage() {
+  S.design.bgImage = '';
+  applyDesign();
+  saveDesign();
+  openModal('design');
+}
+
+function applyDesign() {
+  const d = S.design;
+  const bgEl = document.getElementById('customBg');
+  if (d.bgImage) {
+    bgEl.style.backgroundImage = `url(${d.bgImage})`;
+    document.body.style.background = `linear-gradient(rgba(0,0,0,${(d.overlay||0)/100}), rgba(0,0,0,${(d.overlay||0)/100}))`;
+  } else {
+    bgEl.style.backgroundImage = '';
+    document.body.style.background = `linear-gradient(160deg, ${d.bgColor1 || '#e8752c'} 0%, ${d.bgColor2 || '#1a0800'} 100%)`;
+  }
+  if (d.textColor) document.body.style.color = d.textColor;
+}
+
+async function saveDesign() {
+  try {
+    // Upsert design into settings
+    await fetch(`${SUPABASE_URL}/rest/v1/settings?key=eq.design`, {
+      method: 'DELETE', headers
+    });
+    await supaFetch('settings', {
+      method: 'POST',
+      body: JSON.stringify({ key: 'design', value: JSON.stringify(S.design) })
+    });
+  } catch (e) { console.error('Save design error:', e); }
+}
+
+async function loadDesign() {
+  try {
+    const res = await supaFetch("settings?key=eq.design&select=value");
+    if (res.length > 0) {
+      S.design = JSON.parse(res[0].value);
+      applyDesign();
+    }
+  } catch (e) { console.error('Load design error:', e); }
+}
 
 // ===== KEYBOARD =====
 document.addEventListener('keydown', e => {
