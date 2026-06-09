@@ -444,10 +444,15 @@ function cycleRound() { S.roundIdx = (S.roundIdx + 1) % S.rounds.length; documen
 // ===== TOPICS =====
 function renderCurrentTopic() {
   const t = S.topics[S.temaIdx];
-  if (!t) { document.getElementById('topicTitle').textContent = '—'; document.getElementById('topicInfo').textContent = ''; return; }
+  if (!t) { document.getElementById('topicTitle').textContent = '—'; document.getElementById('topicInfo').innerHTML = ''; return; }
   document.getElementById('topicTitle').textContent = t.title;
-  document.getElementById('topicInfo').textContent = t.context || '';
+  let info = '';
+  if (t.context) info += nl2br(t.context);
+  if (t.questions) info += (info ? '<br><br>' : '') + '<strong>Preguntas:</strong><br>' + nl2br(t.questions);
+  if (t.data) info += (info ? '<br><br>' : '') + '<strong>Datos:</strong><br>' + nl2br(t.data);
+  document.getElementById('topicInfo').innerHTML = info;
 }
+function nl2br(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>'); }
 function nextTopic() { if (!S.topics.length) return; S.temaIdx = (S.temaIdx + 1) % S.topics.length; renderCurrentTopic(); }
 function prevTopic() { if (!S.topics.length) return; S.temaIdx = (S.temaIdx - 1 + S.topics.length) % S.topics.length; renderCurrentTopic(); }
 
