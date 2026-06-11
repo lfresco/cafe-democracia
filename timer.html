@@ -37,9 +37,9 @@ body.live .main-grid { display: grid; grid-template-columns: 1fr auto; gap: 30px
   padding: 10px 14px; margin-bottom: 8px;
   background: rgba(0,0,0,0.25); border-left: 3px solid rgba(255,255,255,0.4);
   border-radius: 4px; font-size: 0.85rem; line-height: 1.4;
-  animation: fadeIn 0.4s ease;
 }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.q-item.new { animation: fadeIn 0.4s ease; }
 .q-time { font-size: 0.6rem; opacity: 0.4; margin-top: 4px; }
 
 /* Layout */
@@ -288,6 +288,8 @@ function stopQuestionsPoll() {
   if (questionsInterval) { clearInterval(questionsInterval); questionsInterval = null; }
 }
 
+let knownQuestionIds = new Set();
+
 async function fetchQuestions() {
   try {
     const qs = await supaFetch('questions?visible=eq.true&order=created_at.desc&limit=10');
@@ -297,10 +299,26 @@ async function fetchQuestions() {
 
 function renderQuestions(qs) {
   const feed = document.getElementById('questionsFeed');
-  feed.innerHTML = qs.map(q => {
+  const currentIds = new Set(qs.map(q => q.id));
+
+  // Remove questions no longer visible (moderator hid them)
+  feed.querySelectorAll('.q-item').forEach(el => {
+    if (!currentIds.has(el.dataset.id)) el.remove();
+  });
+
+  // Add new ones
+  qs.slice().reverse().forEach(q => {
+    if (knownQuestionIds.has(q.id)) return;
+    knownQuestionIds.add(q.id);
     const time = new Date(q.created_at).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
-    return `<div class="q-item"><div>${escQ(q.text)}</div><div class="q-time">${time}</div></div>`;
-  }).join('');
+    const div = document.createElement('div');
+    div.className = 'q-item new';
+    div.dataset.id = q.id;
+    div.innerHTML = `<div>${escQ(q.text)}</div><div class="q-time">${time}</div>`;
+    feed.prepend(div);
+    // Remove animation class after it plays
+    setTimeout(() => div.classList.remove('new'), 500);
+  });
 }
 function escQ(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>'); }
 
