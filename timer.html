@@ -22,8 +22,28 @@ body.live .edit-only { display: none !important; }
 body.live { padding: 20px 40px; }
 body.live .timer { font-size: clamp(10rem, 28vw, 22rem); }
 body.live .topic-section { font-size: 1.1rem; }
+body.live .questions-panel { display: block; }
+body.live .main-grid { display: grid; grid-template-columns: 1fr auto; gap: 30px; flex: 1; align-items: start; }
+
+/* Questions panel (live only) */
+.questions-panel { display: none; }
+.qr-section { text-align: center; margin-bottom: 16px; }
+.qr-section img { width: 120px; height: 120px; border-radius: 8px; background: #fff; padding: 6px; }
+.qr-label { font-size: 0.65rem; opacity: 0.5; margin-top: 6px; text-transform: uppercase; letter-spacing: 1px; }
+.questions-feed { max-height: 50vh; overflow-y: auto; }
+.questions-feed::-webkit-scrollbar { width: 3px; }
+.questions-feed::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 3px; }
+.q-item {
+  padding: 10px 14px; margin-bottom: 8px;
+  background: rgba(0,0,0,0.25); border-left: 3px solid rgba(255,255,255,0.4);
+  border-radius: 4px; font-size: 0.85rem; line-height: 1.4;
+  animation: fadeIn 0.4s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.q-time { font-size: 0.6rem; opacity: 0.4; margin-top: 4px; }
 
 /* Layout */
+.main-grid { flex: 1; display: flex; flex-direction: column; }
 .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .top-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 900; opacity: 0.7; }
 .ctrl { display: flex; gap: 8px; }
@@ -112,29 +132,42 @@ body.live .topic-section { font-size: 1.1rem; }
   </div>
 </div>
 
-<!-- TIMER -->
-<div class="timer-wrap">
-  <div class="timer green" id="timer">03:00</div>
-  <div class="timer-btns edit-only">
-    <button onclick="toggleTimer()" id="btnToggle">Iniciar</button>
-    <button onclick="resetTimer()">Reset</button>
-  </div>
-  <div class="presets edit-only">
-    <button onclick="setPreset(60)">1m</button>
-    <button onclick="setPreset(120)">2m</button>
-    <button onclick="setPreset(180)">3m</button>
-    <button onclick="setPreset(300)">5m</button>
-    <button onclick="setPreset(600)">10m</button>
-  </div>
-</div>
+<!-- TIMER + QUESTIONS (grid in live mode) -->
+<div class="main-grid">
+  <div>
+    <div class="timer-wrap">
+      <div class="timer green" id="timer">03:00</div>
+      <div class="timer-btns edit-only">
+        <button onclick="toggleTimer()" id="btnToggle">Iniciar</button>
+        <button onclick="resetTimer()">Reset</button>
+      </div>
+      <div class="presets edit-only">
+        <button onclick="setPreset(60)">1m</button>
+        <button onclick="setPreset(120)">2m</button>
+        <button onclick="setPreset(180)">3m</button>
+        <button onclick="setPreset(300)">5m</button>
+        <button onclick="setPreset(600)">10m</button>
+      </div>
+    </div>
 
-<!-- TOPIC -->
-<div class="topic-section">
-  <div class="topic-title" id="topicTitle">—</div>
-  <div class="topic-info" id="topicInfo"></div>
-  <div class="topic-nav edit-only">
-    <button onclick="prevTopic()">← Tema</button>
-    <button onclick="nextTopic()">Tema →</button>
+    <!-- TOPIC -->
+    <div class="topic-section">
+      <div class="topic-title" id="topicTitle">—</div>
+      <div class="topic-info" id="topicInfo"></div>
+      <div class="topic-nav edit-only">
+        <button onclick="prevTopic()">← Tema</button>
+        <button onclick="nextTopic()">Tema →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUESTIONS (visible in live mode) -->
+  <div class="questions-panel">
+    <div class="qr-section">
+      <img id="qrCode" alt="QR">
+      <div class="qr-label">Escanea para preguntar</div>
+    </div>
+    <div class="questions-feed" id="questionsFeed"></div>
   </div>
 </div>
 
@@ -228,7 +261,48 @@ function resetTimer() { pause(); remaining = total; updateTimer(); }
 function setPreset(s) { total = s; remaining = s; pause(); updateTimer(); }
 
 // Live
-function toggleLive() { document.body.classList.toggle('live'); }
+function toggleLive() {
+  document.body.classList.toggle('live');
+  if (document.body.classList.contains('live')) {
+    startQuestionsPoll();
+  } else {
+    stopQuestionsPoll();
+  }
+}
+
+// Questions
+let questionsInterval = null;
+let lastQuestionTime = null;
+
+function initQR() {
+  const baseUrl = window.location.href.replace(/\/[^\/]*$/, '/preguntas.html');
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(baseUrl)}&bgcolor=ffffff&color=1a0800`;
+  document.getElementById('qrCode').src = qrUrl;
+}
+
+function startQuestionsPoll() {
+  fetchQuestions();
+  questionsInterval = setInterval(fetchQuestions, 5000);
+}
+function stopQuestionsPoll() {
+  if (questionsInterval) { clearInterval(questionsInterval); questionsInterval = null; }
+}
+
+async function fetchQuestions() {
+  try {
+    const qs = await supaFetch('questions?visible=eq.true&order=created_at.desc&limit=10');
+    renderQuestions(qs);
+  } catch (e) { console.error(e); }
+}
+
+function renderQuestions(qs) {
+  const feed = document.getElementById('questionsFeed');
+  feed.innerHTML = qs.map(q => {
+    const time = new Date(q.created_at).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+    return `<div class="q-item"><div>${escQ(q.text)}</div><div class="q-time">${time}</div></div>`;
+  }).join('');
+}
+function escQ(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>'); }
 
 // Keyboard
 document.addEventListener('keydown', e => {
@@ -242,6 +316,7 @@ document.addEventListener('keydown', e => {
 });
 
 // Init
+initQR();
 if (sessionStorage.getItem('cafe_auth') === '1') {
   document.getElementById('loginScreen').classList.add('hidden');
   loadData();

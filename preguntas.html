@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pregunta — Un café por la democracia</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { min-height: 100vh; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(160deg, #e8752c 0%, #d4601a 40%, #1a0800 100%);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+}
+.card {
+  width: 100%; max-width: 440px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 14px;
+  padding: 32px 28px;
+  text-align: center;
+}
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem; font-weight: 900;
+  margin-bottom: 6px;
+}
+.subtitle { font-size: 0.85rem; opacity: 0.6; margin-bottom: 24px; }
+textarea {
+  width: 100%; min-height: 120px; padding: 14px;
+  font-size: 1rem; font-family: inherit;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 8px; color: #fff; resize: vertical;
+  line-height: 1.5;
+}
+textarea::placeholder { color: rgba(255,255,255,0.4); }
+textarea:focus { outline: none; border-color: rgba(255,255,255,0.5); }
+button {
+  margin-top: 16px; width: 100%; padding: 14px;
+  font-size: 1rem; font-weight: 700; font-family: inherit;
+  background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.5);
+  color: #fff; border-radius: 8px; cursor: pointer;
+  text-transform: uppercase; letter-spacing: 1px;
+  transition: background 0.2s;
+}
+button:hover { background: rgba(255,255,255,0.25); }
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+.msg { margin-top: 14px; font-size: 0.85rem; min-height: 20px; }
+.msg.ok { color: #a5d6a7; }
+.msg.err { color: #ffcdd2; }
+.count { font-size: 0.7rem; opacity: 0.4; margin-top: 16px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Haz tu pregunta</h1>
+  <p class="subtitle">Anónima — será visible para todos en el conversatorio</p>
+  <textarea id="q" placeholder="Escribe tu pregunta aquí..." maxlength="500"></textarea>
+  <button onclick="send()" id="btn">Enviar pregunta</button>
+  <div class="msg" id="msg"></div>
+  <div class="count" id="count">0 / 500</div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://subbsyrooygdevejvdlm.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1YmJzeXJvb3lnZGV2ZWp2ZGxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMDQ2MTQsImV4cCI6MjA5NjU4MDYxNH0.BT-tGx2-JRosfmNz9AKgVpzdNnvvPK5EzuJEi0EmCYI';
+
+const ta = document.getElementById('q');
+ta.addEventListener('input', () => {
+  document.getElementById('count').textContent = `${ta.value.length} / 500`;
+});
+
+async function send() {
+  const text = ta.value.trim();
+  const msg = document.getElementById('msg');
+  const btn = document.getElementById('btn');
+  if (!text) { msg.className = 'msg err'; msg.textContent = 'Escribe algo primero'; return; }
+
+  btn.disabled = true;
+  msg.className = 'msg'; msg.textContent = 'Enviando...';
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/questions`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ text })
+    });
+    if (!res.ok) throw new Error('Error');
+    msg.className = 'msg ok';
+    msg.textContent = '✓ Pregunta enviada. ¡Gracias!';
+    ta.value = '';
+    document.getElementById('count').textContent = '0 / 500';
+    setTimeout(() => { btn.disabled = false; msg.textContent = ''; }, 3000);
+  } catch (e) {
+    msg.className = 'msg err';
+    msg.textContent = 'Error enviando. Intenta de nuevo.';
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>
