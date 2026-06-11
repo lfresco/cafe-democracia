@@ -272,7 +272,7 @@ function toggleLive() {
 
 // Questions
 let questionsInterval = null;
-let lastQuestionTime = null;
+let liveStartTime = null;
 
 function initQR() {
   const baseUrl = window.location.href.replace(/\/[^\/]*$/, '/preguntas.html');
@@ -281,6 +281,9 @@ function initQR() {
 }
 
 function startQuestionsPoll() {
+  liveStartTime = new Date().toISOString();
+  knownQuestionIds = new Set();
+  document.getElementById('questionsFeed').innerHTML = '';
   fetchQuestions();
   questionsInterval = setInterval(fetchQuestions, 5000);
 }
@@ -292,7 +295,7 @@ let knownQuestionIds = new Set();
 
 async function fetchQuestions() {
   try {
-    const qs = await supaFetch('questions?visible=eq.true&order=created_at.desc&limit=10');
+    const qs = await supaFetch(`questions?visible=eq.true&created_at=gte.${liveStartTime}&order=created_at.desc&limit=10`);
     renderQuestions(qs);
   } catch (e) { console.error(e); }
 }
