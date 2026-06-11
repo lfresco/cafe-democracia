@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Timer — Un café por la democracia</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(160deg, #e8752c 0%, #d4601a 30%, #b84a10 60%, #1a0800 100%);
+  color: #fff;
+  display: flex; flex-direction: column;
+  padding: 40px;
+  transition: padding 0.4s;
+}
+
+/* Live mode */
+body.live .edit-only { display: none !important; }
+body.live { padding: 20px 40px; }
+body.live .timer { font-size: clamp(10rem, 28vw, 22rem); }
+body.live .topic-section { font-size: 1.1rem; }
+
+/* Layout */
+.top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.top-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 900; opacity: 0.7; }
+.ctrl { display: flex; gap: 8px; }
+.ctrl button {
+  padding: 5px 12px; font-size: 0.7rem; font-weight: 600;
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.3);
+  color: #fff; border-radius: 4px; cursor: pointer; font-family: inherit;
+}
+.ctrl button:hover { background: rgba(0,0,0,0.6); }
+
+/* Timer */
+.timer-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.timer {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(6rem, 18vw, 14rem);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -4px;
+  line-height: 1;
+  transition: color 0.4s, font-size 0.4s;
+}
+.timer.green { color: #fff; }
+.timer.yellow { color: #ffe082; }
+.timer.red { color: #1a1a1a; animation: blink 0.8s ease-in-out infinite; }
+@keyframes blink { 0%,100%{ opacity:1; } 50%{ opacity:0.5; } }
+
+.timer-btns { display: flex; gap: 12px; margin-top: 20px; }
+.timer-btns button {
+  padding: 10px 30px; font-size: 0.9rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+  background: transparent; border: 2px solid rgba(255,255,255,0.5);
+  color: #fff; border-radius: 6px; cursor: pointer; font-family: inherit;
+}
+.timer-btns button:hover { background: rgba(255,255,255,0.15); }
+.presets { display: flex; gap: 6px; margin-top: 12px; }
+.presets button {
+  padding: 4px 14px; font-size: 0.7rem;
+  background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.2);
+  color: #fff; border-radius: 3px; cursor: pointer; font-family: inherit;
+}
+
+/* Topic section */
+.topic-section {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+}
+.topic-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem; font-weight: 700; font-style: italic;
+  margin-bottom: 8px;
+}
+.topic-info { font-size: 0.9rem; opacity: 0.8; line-height: 1.6; }
+.topic-nav { margin-top: 10px; display: flex; gap: 8px; }
+.topic-nav button {
+  padding: 5px 14px; font-size: 0.7rem; font-weight: 600;
+  background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.2);
+  color: #fff; border-radius: 4px; cursor: pointer; font-family: inherit;
+}
+
+/* Login */
+.login { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; background: linear-gradient(160deg, #e8752c 0%, #b84a10 60%, #1a0800 100%); z-index: 999; }
+.login.hidden { display: none; }
+.login h1 { font-family: 'Playfair Display', serif; font-size: 1.8rem; margin-bottom: 20px; }
+.login input { padding: 12px 18px; font-size: 1rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; color: #fff; text-align: center; letter-spacing: 2px; width: 260px; font-family: inherit; }
+.login input:focus { outline: none; border-color: #fff; }
+.login button { margin-top: 12px; padding: 10px 28px; font-size: 0.85rem; font-weight: 700; background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.5); color: #fff; border-radius: 6px; cursor: pointer; font-family: inherit; }
+.login-err { margin-top: 10px; font-size: 0.8rem; color: #ffcdd2; display: none; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login" id="loginScreen">
+  <h1>Timer — Conversatorio</h1>
+  <input type="password" id="loginPass" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()">
+  <button onclick="doLogin()">Entrar</button>
+  <div class="login-err" id="loginErr">Contraseña incorrecta</div>
+</div>
+
+<!-- TOP -->
+<div class="top edit-only">
+  <div class="top-title">Un café por la democracia</div>
+  <div class="ctrl">
+    <button onclick="toggleLive()">▶ LIVE</button>
+  </div>
+</div>
+
+<!-- TIMER -->
+<div class="timer-wrap">
+  <div class="timer green" id="timer">03:00</div>
+  <div class="timer-btns edit-only">
+    <button onclick="toggleTimer()" id="btnToggle">Iniciar</button>
+    <button onclick="resetTimer()">Reset</button>
+  </div>
+  <div class="presets edit-only">
+    <button onclick="setPreset(60)">1m</button>
+    <button onclick="setPreset(120)">2m</button>
+    <button onclick="setPreset(180)">3m</button>
+    <button onclick="setPreset(300)">5m</button>
+    <button onclick="setPreset(600)">10m</button>
+  </div>
+</div>
+
+<!-- TOPIC -->
+<div class="topic-section">
+  <div class="topic-title" id="topicTitle">—</div>
+  <div class="topic-info" id="topicInfo"></div>
+  <div class="topic-nav edit-only">
+    <button onclick="prevTopic()">← Tema</button>
+    <button onclick="nextTopic()">Tema →</button>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://subbsyrooygdevejvdlm.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1YmJzeXJvb3lnZGV2ZWp2ZGxtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMDQ2MTQsImV4cCI6MjA5NjU4MDYxNH0.BT-tGx2-JRosfmNz9AKgVpzdNnvvPK5EzuJEi0EmCYI';
+const headers = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+
+async function supaFetch(path, opts = {}) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { headers, ...opts });
+  if (!res.ok) throw new Error(`${res.status}`);
+  return res.status === 204 ? null : res.json();
+}
+
+// State
+let topics = [], temaIdx = 0;
+let total = 180, remaining = 180, running = false, interval = null;
+
+// Login
+async function doLogin() {
+  const pass = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginErr');
+  err.style.display = 'none';
+  try {
+    const res = await supaFetch("settings?key=eq.moderator_password&select=value");
+    if (res.length && pass === res[0].value) {
+      document.getElementById('loginScreen').classList.add('hidden');
+      sessionStorage.setItem('cafe_auth', '1');
+      loadData();
+    } else { err.textContent = 'Contraseña incorrecta'; err.style.display = 'block'; }
+  } catch (e) { err.textContent = 'Error de conexión'; err.style.display = 'block'; }
+}
+
+// Data
+async function loadData() {
+  try {
+    const debates = await supaFetch('debates?order=created_at.desc&limit=1');
+    if (debates.length === 0) return;
+    const debate = debates[0];
+    topics = await supaFetch(`topics?debate_id=eq.${debate.id}&order=position`);
+    temaIdx = 0;
+    renderTopic();
+    // Load design
+    const dRes = await supaFetch("settings?key=eq.design&select=value");
+    if (dRes.length > 0) {
+      const d = JSON.parse(dRes[0].value);
+      if (d.bgImage) {
+        document.body.style.background = `linear-gradient(rgba(0,0,0,${(d.overlay||0)/100}), rgba(0,0,0,${(d.overlay||0)/100}))`;
+        document.body.style.backgroundImage = `url(${d.bgImage})`;
+        document.body.style.backgroundSize = 'cover';
+        document.body.style.backgroundPosition = 'center';
+      } else if (d.bgColor1) {
+        document.body.style.background = `linear-gradient(160deg, ${d.bgColor1} 0%, ${d.bgColor2 || '#1a0800'} 100%)`;
+      }
+      if (d.textColor) document.body.style.color = d.textColor;
+    }
+  } catch (e) { console.error(e); }
+}
+
+// Topic
+function renderTopic() {
+  const t = topics[temaIdx];
+  if (!t) { document.getElementById('topicTitle').textContent = '—'; document.getElementById('topicInfo').innerHTML = ''; return; }
+  document.getElementById('topicTitle').textContent = t.title;
+  let info = '';
+  if (t.context) info += nl2br(t.context);
+  if (t.questions) info += (info ? '<br><br>' : '') + '<strong>Preguntas:</strong><br>' + nl2br(t.questions);
+  if (t.data) info += (info ? '<br><br>' : '') + '<strong>Datos:</strong><br>' + nl2br(t.data);
+  document.getElementById('topicInfo').innerHTML = info;
+}
+function nl2br(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>'); }
+function nextTopic() { if (!topics.length) return; temaIdx = (temaIdx + 1) % topics.length; renderTopic(); }
+function prevTopic() { if (!topics.length) return; temaIdx = (temaIdx - 1 + topics.length) % topics.length; renderTopic(); }
+
+// Timer
+function fmt(s) { return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0'); }
+function updateTimer() {
+  const el = document.getElementById('timer');
+  el.textContent = fmt(remaining);
+  const pct = remaining / total;
+  el.className = 'timer ' + (pct > 0.5 ? 'green' : pct > 0.2 ? 'yellow' : 'red');
+}
+function toggleTimer() { running ? pause() : start(); }
+function start() {
+  if (remaining <= 0) return;
+  running = true; document.getElementById('btnToggle').textContent = 'Pausa';
+  interval = setInterval(() => { remaining--; updateTimer(); if (remaining <= 0) pause(); }, 1000);
+}
+function pause() { running = false; document.getElementById('btnToggle').textContent = 'Iniciar'; clearInterval(interval); interval = null; }
+function resetTimer() { pause(); remaining = total; updateTimer(); }
+function setPreset(s) { total = s; remaining = s; pause(); updateTimer(); }
+
+// Live
+function toggleLive() { document.body.classList.toggle('live'); }
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  switch(e.key) {
+    case ' ': e.preventDefault(); toggleTimer(); break;
+    case 'l': case 'L': toggleLive(); break;
+    case 't': case 'T': case 'ArrowRight': nextTopic(); break;
+    case 'ArrowLeft': prevTopic(); break;
+  }
+});
+
+// Init
+if (sessionStorage.getItem('cafe_auth') === '1') {
+  document.getElementById('loginScreen').classList.add('hidden');
+  loadData();
+}
+updateTimer();
+</script>
+</body>
+</html>
