@@ -4,189 +4,236 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Un café por la democracia</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; overflow: hidden; }
-body {
-  font-family: 'Inter', sans-serif;
-  background: transparent;
-  color: #fff;
+:root {
+  --radius: 14px;
+  --glass: rgba(255,255,255,0.08);
+  --glass-border: rgba(255,255,255,0.12);
+  --glass-hover: rgba(255,255,255,0.14);
+  --text-primary: #fff;
+  --text-secondary: rgba(255,255,255,0.6);
+  --text-tertiary: rgba(255,255,255,0.35);
+  --accent: rgba(255,255,255,0.9);
+  --shadow: 0 8px 32px rgba(0,0,0,0.2);
+  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; -webkit-font-smoothing: antialiased; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; color: var(--text-primary); background: transparent; }
 
 /* ===== VIEWS ===== */
 .view { display: none; height: 100vh; flex-direction: column; }
 .view.active { display: flex !important; }
 
-/* ===== LOGIN ===== */
-#loginView { align-items: center; justify-content: center; }
-.login-box { text-align: center; max-width: 360px; width: 90%; }
-.login-box h1 { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 900; margin-bottom: 8px; }
-.login-box p { font-size: 0.85rem; opacity: 0.6; margin-bottom: 24px; }
-.login-box input {
-  width: 100%; padding: 14px 18px; font-size: 1rem;
-  background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.3);
-  border-radius: 6px; color: #fff; font-family: inherit; text-align: center; letter-spacing: 2px;
-}
-.login-box input::placeholder { color: rgba(255,255,255,0.4); letter-spacing: 0; }
-.login-box input:focus { outline: none; border-color: #fff; }
-.login-box button {
-  margin-top: 14px; padding: 12px 32px; font-size: 0.9rem; font-weight: 700;
-  background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.5);
-  color: #fff; border-radius: 6px; cursor: pointer; font-family: inherit;
-  text-transform: uppercase; letter-spacing: 1px;
-}
-.login-box button:hover { background: rgba(255,255,255,0.25); }
-.login-err { margin-top: 12px; font-size: 0.8rem; color: #ffcdd2; display: none; }
-
-/* ===== ADMIN VIEW ===== */
-#adminView { padding: 24px 40px; gap: 16px; overflow-y: auto; }
-.admin-header { display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
-.admin-header h1 { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 900; }
-.admin-header .ctrl { display: flex; gap: 8px; }
-.btn {
-  padding: 8px 16px; font-size: 0.75rem; font-weight: 600;
-  background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.3);
-  color: #fff; border-radius: 5px; cursor: pointer; font-family: inherit; transition: background 0.2s;
-}
-.btn:hover { background: rgba(0,0,0,0.6); }
-.btn-live {
-  background: rgba(255,255,255,0.15); border-color: #fff; font-size: 0.85rem; padding: 10px 24px;
-}
-.btn-live:hover { background: rgba(255,255,255,0.3); }
-
-.admin-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex: 1; overflow-y: auto;
-}
-.admin-section {
-  background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 10px; padding: 20px; overflow-y: auto;
-}
-.admin-section h2 {
-  font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700;
-  margin-bottom: 12px; opacity: 0.9;
-}
-.admin-section label {
-  display: block; font-size: 0.65rem; font-weight: 600;
-  text-transform: uppercase; letter-spacing: 1px; opacity: 0.5;
-  margin-top: 10px; margin-bottom: 4px;
-}
-.admin-section input, .admin-section textarea {
-  width: 100%; padding: 8px 10px;
-  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 4px; color: #fff; font-family: inherit; font-size: 0.85rem;
-}
-.admin-section textarea { min-height: 70px; resize: vertical; line-height: 1.5; }
-.save-status { font-size: 0.75rem; opacity: 0.6; }
-
-/* Topics cards */
-.topics-list { display: flex; flex-direction: column; gap: 14px; }
-.topic-card {
-  background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 8px; padding: 14px;
-}
-.topic-card h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 8px; }
-.topic-actions { display: flex; gap: 6px; margin-top: 10px; }
-.topic-actions button {
-  padding: 4px 10px; font-size: 0.65rem; font-weight: 600;
-  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-  color: #fff; border-radius: 3px; cursor: pointer; font-family: inherit;
-}
-.topic-actions button:hover { background: rgba(255,255,255,0.2); }
-.topic-actions button.btn-danger:hover { background: rgba(255,80,80,0.3); }
-.add-btn {
-  padding: 12px; text-align: center; border: 2px dashed rgba(255,255,255,0.2);
-  border-radius: 8px; cursor: pointer; opacity: 0.5; font-size: 0.85rem;
-}
-.add-btn:hover { opacity: 0.8; }
-
-/* Color pickers */
-.color-row { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
-.color-row input[type="color"] { width: 40px; height: 30px; border: none; border-radius: 4px; cursor: pointer; background: none; }
-.color-row span { font-size: 0.75rem; opacity: 0.6; }
-.upload-area {
-  margin-top: 8px; padding: 16px; text-align: center;
-  border: 2px dashed rgba(255,255,255,0.25); border-radius: 8px; cursor: pointer;
-}
-.upload-area:hover { border-color: rgba(255,255,255,0.5); }
-.upload-preview { max-width: 100%; max-height: 100px; margin-top: 8px; border-radius: 4px; }
-
-/* ===== LIVE VIEW ===== */
-#liveView { padding: 24px 40px; position: relative; }
-.live-header {
-  display: flex; justify-content: space-between; align-items: center;
-  position: absolute; top: 16px; left: 40px; right: 40px; z-index: 10;
-  opacity: 0; transition: opacity 0.3s;
-}
-#liveView:hover .live-header { opacity: 1; }
-.live-badge { display: flex; align-items: center; gap: 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; }
-.live-dot { width: 8px; height: 8px; background: #fff; border-radius: 50%; animation: pulse 1.5s ease-in-out infinite; }
-@keyframes pulse { 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }
-
-.live-body {
-  flex: 1; display: grid; grid-template-columns: 1fr 280px; gap: 30px; align-items: center;
-}
-.live-center { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 16px; height: 100%; }
-
-.timer {
-  font-family: 'Inter', sans-serif;
-  font-size: clamp(8rem, 22vw, 18rem);
-  font-weight: 800; font-variant-numeric: tabular-nums;
-  letter-spacing: -6px; line-height: 1; transition: color 0.4s;
-}
-.timer.green { color: #fff; }
-.timer.yellow { color: #ffe082; }
-.timer.red { color: #1a1a1a; animation: blink 0.8s ease-in-out infinite; }
-@keyframes blink { 0%,100%{ opacity:1; } 50%{ opacity:0.5; } }
-
-.live-topic {
-  max-width: 700px; width: 100%; text-align: left;
-  padding: 20px; background: rgba(0,0,0,0.2); border-radius: 10px;
-}
-.live-topic-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.5rem; font-weight: 700; font-style: italic; margin-bottom: 8px;
-}
-.live-topic-info { font-size: 0.9rem; opacity: 0.8; line-height: 1.6; }
-
-.live-controls {
-  display: flex; gap: 10px; margin-top: 10px; justify-content: center;
-}
-.live-controls button {
-  padding: 8px 20px; font-size: 0.8rem; font-weight: 700;
-  background: rgba(0,0,0,0.3); border: 1.5px solid rgba(255,255,255,0.4);
-  color: #fff; border-radius: 5px; cursor: pointer; font-family: inherit;
-  text-transform: uppercase; letter-spacing: 0.5px;
-}
-.live-controls button:hover { background: rgba(0,0,0,0.5); }
-.live-controls button.btn-random {
-  border-color: rgba(255,200,50,0.6); color: #ffe082;
-}
-.live-controls button.btn-random:hover { background: rgba(255,200,50,0.15); }
-
-/* Right panel: QR + questions */
-.live-right { display: flex; flex-direction: column; height: 100%; }
-.qr-section { text-align: center; margin-bottom: 14px; flex-shrink: 0; }
-.qr-section img { width: 110px; height: 110px; border-radius: 8px; background: #fff; padding: 5px; }
-.qr-label { font-size: 0.6rem; opacity: 0.4; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; }
-.questions-feed { flex: 1; overflow-y: auto; }
-.questions-feed::-webkit-scrollbar { width: 3px; }
-.questions-feed::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 3px; }
-.q-item {
-  padding: 10px 12px; margin-bottom: 6px;
-  background: rgba(0,0,0,0.25); border-left: 3px solid rgba(255,255,255,0.4);
-  border-radius: 4px; font-size: 0.8rem; line-height: 1.4;
-}
-.q-item.new { animation: fadeIn 0.4s ease; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-.q-time { font-size: 0.55rem; opacity: 0.4; margin-top: 3px; }
-
-/* Custom background */
+/* ===== CUSTOM BG ===== */
 .custom-bg {
   position: fixed; inset: 0; z-index: -1;
-  background: linear-gradient(160deg, #e8752c 0%, #d4601a 30%, #b84a10 60%, #1a0800 100%);
-  background-size: cover; background-position: center; background-repeat: no-repeat;
+  background: linear-gradient(160deg, #e8752c 0%, #c45518 35%, #8a3510 65%, #1a0800 100%);
+  background-size: cover; background-position: center;
 }
+
+/* ===== BUTTONS ===== */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; font-size: 0.8rem; font-weight: 500;
+  background: var(--glass); border: 1px solid var(--glass-border);
+  color: var(--text-primary); border-radius: 8px; cursor: pointer;
+  font-family: inherit; transition: all var(--transition);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+.btn:hover { background: var(--glass-hover); border-color: rgba(255,255,255,0.25); transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn-primary { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.35); font-weight: 600; }
+.btn-primary:hover { background: rgba(255,255,255,0.3); }
+.btn-ghost { background: transparent; border-color: transparent; }
+.btn-ghost:hover { background: var(--glass); }
+
+/* ===== LOGIN ===== */
+#loginView { align-items: center; justify-content: center; }
+.login-card {
+  text-align: center; max-width: 380px; width: 90%;
+  padding: 48px 36px;
+  background: var(--glass); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+  border: 1px solid var(--glass-border); border-radius: 20px;
+  box-shadow: var(--shadow);
+}
+.login-card h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
+.login-card p { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 28px; }
+.login-card input {
+  width: 100%; padding: 14px 18px; font-size: 1rem;
+  background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px; color: #fff; font-family: inherit; text-align: center;
+  letter-spacing: 2px; transition: border-color var(--transition);
+}
+.login-card input::placeholder { color: var(--text-tertiary); letter-spacing: 0; }
+.login-card input:focus { outline: none; border-color: rgba(255,255,255,0.4); }
+.login-card button {
+  margin-top: 16px; width: 100%; padding: 14px;
+  font-size: 0.9rem; font-weight: 600;
+  background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.3);
+  color: #fff; border-radius: 10px; cursor: pointer; font-family: inherit;
+  transition: all var(--transition);
+}
+.login-card button:hover { background: rgba(255,255,255,0.25); }
+.login-err { margin-top: 14px; font-size: 0.8rem; color: #ff9f9f; display: none; }
+
+/* ===== ADMIN ===== */
+#adminView { padding: 28px 36px; gap: 20px; overflow-y: auto; }
+.admin-top { display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+.admin-top h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; }
+.admin-top .ctrl { display: flex; gap: 8px; align-items: center; }
+.save-status { font-size: 0.75rem; color: var(--text-secondary); }
+
+.admin-grid {
+  display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px; flex: 1; overflow-y: auto;
+  padding-bottom: 20px;
+}
+.card {
+  background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border); border-radius: var(--radius);
+  padding: 22px; box-shadow: var(--shadow);
+  transition: border-color var(--transition);
+}
+.card:hover { border-color: rgba(255,255,255,0.2); }
+.card h2 { font-size: 0.95rem; font-weight: 700; margin-bottom: 14px; letter-spacing: -0.3px; }
+.card label {
+  display: block; font-size: 0.65rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  color: var(--text-secondary); margin-top: 12px; margin-bottom: 5px;
+}
+.card input[type="text"], .card input[type="number"], .card textarea {
+  width: 100%; padding: 10px 12px;
+  background: rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px; color: #fff; font-family: inherit; font-size: 0.85rem;
+  transition: border-color var(--transition);
+}
+.card input:focus, .card textarea:focus { outline: none; border-color: rgba(255,255,255,0.25); }
+.card textarea { min-height: 80px; resize: vertical; line-height: 1.6; }
+
+/* Topic cards */
+.topic-card {
+  background: rgba(0,0,0,0.12); border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px; padding: 16px; margin-bottom: 12px;
+  transition: all var(--transition);
+}
+.topic-card:hover { border-color: rgba(255,255,255,0.15); }
+.topic-card h3 { font-size: 0.85rem; font-weight: 600; margin-bottom: 10px; color: var(--text-secondary); }
+.topic-actions { display: flex; gap: 6px; margin-top: 10px; }
+.add-topic-btn {
+  padding: 14px; text-align: center; border: 1.5px dashed rgba(255,255,255,0.15);
+  border-radius: 10px; cursor: pointer; color: var(--text-tertiary);
+  font-size: 0.85rem; transition: all var(--transition); margin-top: 12px;
+}
+.add-topic-btn:hover { border-color: rgba(255,255,255,0.3); color: var(--text-secondary); }
+
+/* Design section */
+.color-row { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+.color-row input[type="color"] { width: 36px; height: 36px; border: 2px solid rgba(255,255,255,0.15); border-radius: 8px; cursor: pointer; background: none; padding: 2px; }
+.color-row span { font-size: 0.75rem; color: var(--text-secondary); }
+.upload-area {
+  margin-top: 8px; padding: 20px; text-align: center;
+  border: 1.5px dashed rgba(255,255,255,0.2); border-radius: 10px; cursor: pointer;
+  transition: all var(--transition); color: var(--text-tertiary); font-size: 0.8rem;
+}
+.upload-area:hover { border-color: rgba(255,255,255,0.4); color: var(--text-secondary); }
+.upload-preview { max-width: 100%; max-height: 80px; margin-top: 10px; border-radius: 6px; opacity: 0.8; }
+
+/* ===== LIVE VIEW ===== */
+#liveView { padding: 0; position: relative; }
+.live-header {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 10;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 20px 36px;
+  opacity: 0; transition: opacity 0.4s;
+}
+#liveView:hover .live-header { opacity: 1; }
+.live-badge {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.live-dot { width: 8px; height: 8px; background: #ff453a; border-radius: 50%; animation: livePulse 2s ease-in-out infinite; }
+@keyframes livePulse { 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:0.6; transform:scale(0.85); } }
+
+.live-body { flex: 1; display: grid; grid-template-columns: 1fr 260px; height: 100%; }
+.live-center {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 60px 40px 40px;
+  gap: 20px;
+}
+
+.timer {
+  font-size: clamp(7rem, 20vw, 16rem);
+  font-weight: 800; font-variant-numeric: tabular-nums;
+  letter-spacing: -6px; line-height: 0.9;
+  transition: color 0.5s ease;
+}
+.timer.green { color: var(--text-primary); }
+.timer.yellow { color: #ffd60a; }
+.timer.red { color: #ff453a; animation: timerPulse 1s ease-in-out infinite; }
+@keyframes timerPulse { 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }
+
+.live-controls {
+  display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+}
+.live-controls button {
+  padding: 10px 20px; font-size: 0.78rem; font-weight: 600;
+  background: var(--glass); border: 1px solid var(--glass-border);
+  color: var(--text-primary); border-radius: 8px; cursor: pointer;
+  font-family: inherit; transition: all var(--transition);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+.live-controls button:hover { background: var(--glass-hover); transform: translateY(-1px); }
+.live-controls button:active { transform: translateY(0); }
+.live-controls .btn-random { border-color: rgba(255,214,10,0.3); color: #ffd60a; }
+.live-controls .btn-random:hover { background: rgba(255,214,10,0.1); }
+
+.live-topic {
+  max-width: 640px; width: 100%; text-align: left;
+  padding: 24px 28px;
+  background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border); border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.live-topic-title { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 10px; }
+.live-topic-info { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.65; }
+.live-topic-info strong { color: var(--text-primary); font-weight: 600; }
+
+/* Right panel */
+.live-right {
+  display: flex; flex-direction: column;
+  padding: 24px 20px;
+  border-left: 1px solid var(--glass-border);
+  background: rgba(0,0,0,0.1);
+}
+.qr-section { text-align: center; margin-bottom: 16px; flex-shrink: 0; }
+.qr-section img {
+  width: 100px; height: 100px; border-radius: 10px;
+  background: #fff; padding: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.qr-label { font-size: 0.6rem; color: var(--text-tertiary); margin-top: 8px; letter-spacing: 0.5px; }
+.questions-title { font-size: 0.65rem; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
+.questions-feed { flex: 1; overflow-y: auto; }
+.questions-feed::-webkit-scrollbar { width: 2px; }
+.questions-feed::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+.q-item {
+  padding: 10px 12px; margin-bottom: 8px;
+  background: rgba(255,255,255,0.05); border-radius: 8px;
+  font-size: 0.8rem; line-height: 1.45; color: var(--text-secondary);
+  border: 1px solid rgba(255,255,255,0.05);
+  transition: all var(--transition);
+}
+.q-item.new { animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+@keyframes slideIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+.q-time { font-size: 0.55rem; color: var(--text-tertiary); margin-top: 4px; }
+
+/* Scrollbar for admin */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
 </style>
 </head>
 <body>
@@ -195,9 +242,9 @@ body {
 
 <!-- ===== LOGIN ===== -->
 <div class="view active" id="loginView">
-  <div class="login-box">
-    <h1>Un café por la democracia</h1>
-    <p>Acceso para moderadores</p>
+  <div class="login-card">
+    <h1>Un café por la<br>democracia</h1>
+    <p>Acceso moderadores</p>
     <input type="password" id="loginPass" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()">
     <button onclick="doLogin()">Entrar</button>
     <div class="login-err" id="loginErr">Contraseña incorrecta</div>
@@ -206,65 +253,59 @@ body {
 
 <!-- ===== ADMIN ===== -->
 <div class="view" id="adminView">
-  <div class="admin-header">
-    <h1>Un café por la democracia — Admin</h1>
+  <div class="admin-top">
+    <h1>Conversatorio</h1>
     <div class="ctrl">
       <span class="save-status" id="saveStatus"></span>
-      <button class="btn" onclick="saveAll()">💾 Guardar</button>
-      <button class="btn btn-live" onclick="goLive()">▶ LIVE</button>
+      <button class="btn" onclick="saveAll()">Guardar</button>
+      <button class="btn btn-primary" onclick="goLive()">▶ &nbsp;Iniciar LIVE</button>
     </div>
   </div>
 
   <div class="admin-grid">
     <!-- TOPICS -->
-    <div class="admin-section" style="grid-row: span 2;">
-      <h2>Temas del conversatorio</h2>
-      <div class="topics-list" id="topicsList"></div>
-      <div class="add-btn" onclick="addTopic()">+ Agregar tema</div>
+    <div class="card" style="grid-row: span 2; overflow-y: auto;">
+      <h2>Temas del debate</h2>
+      <div id="topicsList"></div>
+      <div class="add-topic-btn" onclick="addTopic()">+ Agregar tema</div>
     </div>
 
-    <!-- SPEAKERS & RULES -->
-    <div class="admin-section">
-      <h2>Panelistas</h2>
-      <label>Un nombre por línea</label>
-      <textarea id="adminSpeakers" rows="5" oninput="debounceSave()"></textarea>
-
-      <h2 style="margin-top:18px;">Reglas</h2>
-      <label>Una regla por línea</label>
-      <textarea id="adminRules" rows="5" oninput="debounceSave()"></textarea>
-
-      <h2 style="margin-top:18px;">Timer (segundos por defecto)</h2>
+    <!-- CONFIG -->
+    <div class="card">
+      <h2>Configuración</h2>
+      <label>Panelistas (uno por línea)</label>
+      <textarea id="adminSpeakers" rows="4" oninput="debounceSave()"></textarea>
+      <label>Reglas (una por línea)</label>
+      <textarea id="adminRules" rows="4" oninput="debounceSave()"></textarea>
+      <label>Duración timer (segundos)</label>
       <input type="number" id="adminTimer" value="180" style="width:100px" oninput="debounceSave()">
-
-      <h2 style="margin-top:18px;">🎲 Preguntas random</h2>
-      <label>Una pregunta por línea (se extraerá una al azar en vivo)</label>
-      <textarea id="adminRandom" rows="6" oninput="debounceSave()"></textarea>
+      <label>🎲 Preguntas random (una por línea)</label>
+      <textarea id="adminRandom" rows="5" oninput="debounceSave()" placeholder="Se extraen sin repetición durante la sesión live..."></textarea>
     </div>
 
     <!-- DESIGN -->
-    <div class="admin-section">
+    <div class="card">
       <h2>Diseño</h2>
       <label>Imagen de fondo</label>
       <div class="upload-area" onclick="document.getElementById('bgFile').click()">
         <input type="file" id="bgFile" accept="image/*" onchange="handleBgUpload(this)" style="display:none">
-        <span style="font-size:0.8rem;opacity:0.6;">Click para subir</span>
+        Click para subir imagen
         <div id="bgPreview"></div>
       </div>
-      <button class="btn" style="margin-top:6px;" onclick="removeBg()">Quitar imagen</button>
-
-      <label>Gradiente de fondo</label>
+      <button class="btn btn-ghost" style="margin-top:6px;font-size:0.7rem;" onclick="removeBg()">Quitar imagen</button>
+      <label>Gradiente</label>
       <div class="color-row">
-        <input type="color" id="colBg1" value="#e8752c" onchange="debounceSave()">
+        <input type="color" id="colBg1" value="#e8752c" onchange="previewDesign()">
         <span>Inicio</span>
-        <input type="color" id="colBg2" value="#1a0800" onchange="debounceSave()">
+        <input type="color" id="colBg2" value="#1a0800" onchange="previewDesign()">
         <span>Final</span>
       </div>
-      <label>Color de texto</label>
+      <label>Texto</label>
       <div class="color-row">
-        <input type="color" id="colText" value="#ffffff" onchange="debounceSave()">
+        <input type="color" id="colText" value="#ffffff" onchange="previewDesign()">
       </div>
-      <label>Oscurecer fondo (imagen)</label>
-      <input type="range" id="bgOverlay" min="0" max="80" value="0" style="width:100%" oninput="debounceSave()">
+      <label>Oscurecer imagen</label>
+      <input type="range" id="bgOverlay" min="0" max="80" value="0" style="width:100%" oninput="previewDesign()">
     </div>
   </div>
 </div>
@@ -273,9 +314,7 @@ body {
 <div class="view" id="liveView">
   <div class="live-header">
     <div class="live-badge"><div class="live-dot"></div> EN VIVO</div>
-    <div class="ctrl">
-      <button class="btn" onclick="exitLive()">✕ Salir</button>
-    </div>
+    <button class="btn" onclick="exitLive()">✕ &nbsp;Salir</button>
   </div>
 
   <div class="live-body">
@@ -284,11 +323,11 @@ body {
       <div class="live-controls">
         <button onclick="toggleTimer()" id="btnToggle">Iniciar</button>
         <button onclick="resetTimer()">Reset</button>
-        <button onclick="prevTopic()">← Tema</button>
-        <button onclick="nextTopic()">Tema →</button>
-        <button class="btn-random" onclick="randomTopic()">🎲 Random</button>
+        <button onclick="prevTopic()">←</button>
+        <button onclick="nextTopic()">→</button>
+        <button class="btn-random" onclick="randomQuestion()">🎲 Random</button>
       </div>
-      <div class="live-topic" id="liveTopic">
+      <div class="live-topic">
         <div class="live-topic-title" id="liveTopicTitle">—</div>
         <div class="live-topic-info" id="liveTopicInfo"></div>
       </div>
@@ -299,6 +338,7 @@ body {
         <img id="qrCode" alt="QR">
         <div class="qr-label">Escanea para preguntar</div>
       </div>
+      <div class="questions-title">Preguntas del público</div>
       <div class="questions-feed" id="questionsFeed"></div>
     </div>
   </div>
@@ -323,6 +363,7 @@ const S = {
   rules: [],
   topics: [],
   randomQuestions: [],
+  randomUsed: [],
   design: { bgColor1: '#e8752c', bgColor2: '#1a0800', textColor: '#ffffff', bgImage: '', overlay: 0 },
   temaIdx: 0,
   timerTotal: 180,
@@ -352,16 +393,16 @@ async function doLogin() {
   } catch (e) { err.textContent = 'Error de conexión'; err.style.display = 'block'; }
 }
 
-// ===== LOAD DATA =====
+// ===== LOAD =====
 async function loadData() {
   let debates = await supa('debates?order=created_at.desc&limit=1');
   let debate;
   if (debates.length === 0) {
     const created = await supa('debates', { method: 'POST', body: JSON.stringify({
       title: 'Un café por la democracia',
-      speakers: ['Panelista 1', 'Panelista 2', 'Panelista 3'],
-      rules: ['Máximo 3 minutos por intervención', 'Respetar turno de palabra', 'No interrumpir al orador'],
-      rounds: ['Ronda 1', 'Ronda 2', 'Debate libre', 'Cierre']
+      speakers: ['Panelista 1', 'Panelista 2'],
+      rules: ['Máximo 3 minutos por intervención', 'Respetar turno de palabra'],
+      rounds: ['Ronda 1', 'Ronda 2', 'Debate libre']
     })});
     debate = created[0];
   } else { debate = debates[0]; }
@@ -372,13 +413,11 @@ async function loadData() {
   S.topics = await supa(`topics?debate_id=eq.${S.debateId}&order=position`);
   S.temaIdx = 0;
 
-  // Load random questions
   try {
     const rqs = await supa(`random_questions?debate_id=eq.${S.debateId}&order=created_at`);
     S.randomQuestions = rqs.map(r => r.text);
   } catch(e) { S.randomQuestions = []; }
 
-  // Load design
   try {
     const dRes = await supa("settings?key=eq.design&select=value");
     if (dRes.length > 0) S.design = JSON.parse(dRes[0].value);
@@ -388,7 +427,7 @@ async function loadData() {
   applyDesign();
 }
 
-// ===== RENDER ADMIN =====
+// ===== ADMIN RENDER =====
 function renderAdmin() {
   document.getElementById('adminSpeakers').value = S.speakers.join('\n');
   document.getElementById('adminRules').value = S.rules.join('\n');
@@ -398,28 +437,23 @@ function renderAdmin() {
   document.getElementById('colBg2').value = S.design.bgColor2 || '#1a0800';
   document.getElementById('colText').value = S.design.textColor || '#ffffff';
   document.getElementById('bgOverlay').value = S.design.overlay || 0;
-  if (S.design.bgImage) {
-    document.getElementById('bgPreview').innerHTML = `<img class="upload-preview" src="${S.design.bgImage}">`;
-  }
+  if (S.design.bgImage) document.getElementById('bgPreview').innerHTML = `<img class="upload-preview" src="${S.design.bgImage}">`;
   renderTopics();
 }
 
 function renderTopics() {
-  const el = document.getElementById('topicsList');
-  el.innerHTML = S.topics.map((t, i) => `
+  document.getElementById('topicsList').innerHTML = S.topics.map((t, i) => `
     <div class="topic-card">
-      <h3>${i + 1}. ${t.title || 'Sin título'}</h3>
+      <h3>Tema ${i + 1}</h3>
       <label>Título</label>
-      <input value="${esc(t.title)}" oninput="S.topics[${i}].title=this.value;debounceSave()">
+      <input type="text" value="${esc(t.title)}" oninput="S.topics[${i}].title=this.value;debounceSave()">
       <label>Contexto</label>
       <textarea oninput="S.topics[${i}].context=this.value;debounceSave()">${esc(t.context)}</textarea>
       <label>Preguntas guía</label>
       <textarea oninput="S.topics[${i}].questions=this.value;debounceSave()">${esc(t.questions)}</textarea>
       <label>Datos</label>
       <textarea oninput="S.topics[${i}].data=this.value;debounceSave()">${esc(t.data)}</textarea>
-      <div class="topic-actions">
-        <button class="btn-danger" onclick="removeTopic(${i})">Eliminar</button>
-      </div>
+      <div class="topic-actions"><button class="btn btn-ghost" onclick="removeTopic(${i})">Eliminar</button></div>
     </div>
   `).join('');
 }
@@ -429,13 +463,11 @@ function removeTopic(i) { S.topics.splice(i,1); renderTopics(); debounceSave(); 
 
 // ===== SAVE =====
 let saveTimeout;
-function debounceSave() { clearTimeout(saveTimeout); saveTimeout = setTimeout(saveAll, 1500); }
+function debounceSave() { clearTimeout(saveTimeout); saveTimeout = setTimeout(saveAll, 2000); }
 
 async function saveAll() {
   const status = document.getElementById('saveStatus');
   status.textContent = 'Guardando...';
-
-  // Read admin fields
   S.speakers = document.getElementById('adminSpeakers').value.trim().split('\n').filter(Boolean);
   S.rules = document.getElementById('adminRules').value.trim().split('\n').filter(Boolean);
   S.randomQuestions = document.getElementById('adminRandom').value.trim().split('\n').filter(Boolean);
@@ -451,18 +483,15 @@ async function saveAll() {
     if (S.topics.length > 0) {
       await supa('topics', { method: 'POST', body: JSON.stringify(S.topics.map((t,i) => ({ debate_id: S.debateId, position: i, title: t.title||'', context: t.context||'', questions: t.questions||'', data: t.data||'' }))) });
     }
-    // Save random questions
     await fetch(`${SUPA_URL}/rest/v1/random_questions?debate_id=eq.${S.debateId}`, { method: 'DELETE', headers: hdrs });
     if (S.randomQuestions.length > 0) {
       await supa('random_questions', { method: 'POST', body: JSON.stringify(S.randomQuestions.map(text => ({ debate_id: S.debateId, text }))) });
     }
-    // Save design
     await fetch(`${SUPA_URL}/rest/v1/settings?key=eq.design`, { method: 'DELETE', headers: hdrs });
     await supa('settings', { method: 'POST', body: JSON.stringify({ key: 'design', value: JSON.stringify(S.design) }) });
-
     applyDesign();
-    status.textContent = '✓ Guardado';
-    setTimeout(() => { status.textContent = ''; }, 2500);
+    status.textContent = '✓';
+    setTimeout(() => { status.textContent = ''; }, 2000);
   } catch (e) { status.textContent = '✕ Error'; console.error(e); }
 }
 
@@ -472,14 +501,19 @@ function applyDesign() {
   const bgEl = document.getElementById('customBg');
   if (d.bgImage) {
     bgEl.style.backgroundImage = `linear-gradient(rgba(0,0,0,${(d.overlay||0)/100}), rgba(0,0,0,${(d.overlay||0)/100})), url(${d.bgImage})`;
-    bgEl.style.backgroundSize = 'cover';
-    bgEl.style.backgroundPosition = 'center';
   } else {
     bgEl.style.backgroundImage = `linear-gradient(160deg, ${d.bgColor1||'#e8752c'} 0%, ${d.bgColor2||'#1a0800'} 100%)`;
-    bgEl.style.backgroundSize = '';
-    bgEl.style.backgroundPosition = '';
   }
   if (d.textColor) document.body.style.color = d.textColor;
+}
+
+function previewDesign() {
+  S.design.bgColor1 = document.getElementById('colBg1').value;
+  S.design.bgColor2 = document.getElementById('colBg2').value;
+  S.design.textColor = document.getElementById('colText').value;
+  S.design.overlay = document.getElementById('bgOverlay').value;
+  applyDesign();
+  debounceSave();
 }
 
 async function handleBgUpload(input) {
@@ -494,7 +528,7 @@ async function handleBgUpload(input) {
 }
 function removeBg() { S.design.bgImage = ''; document.getElementById('bgPreview').innerHTML = ''; applyDesign(); debounceSave(); }
 
-// ===== LIVE MODE =====
+// ===== LIVE =====
 let liveStartTime = null;
 let questionsInterval = null;
 let knownQIds = new Set();
@@ -504,6 +538,7 @@ function goLive() {
     S.timerTotal = parseInt(document.getElementById('adminTimer').value) || 180;
     S.timerRemaining = S.timerTotal;
     S.temaIdx = 0;
+    S.randomUsed = [];
     updateTimer();
     renderLiveTopic();
     initQR();
@@ -512,7 +547,7 @@ function goLive() {
     document.getElementById('questionsFeed').innerHTML = '';
     questionsInterval = setInterval(fetchQuestions, 5000);
     showView('liveView');
-  } catch(e) { console.error('goLive error:', e); alert('Error: ' + e.message); }
+  } catch(e) { console.error(e); alert('Error: ' + e.message); }
 }
 
 function exitLive() {
@@ -553,18 +588,31 @@ function renderLiveTopic() {
   document.getElementById('liveTopicInfo').innerHTML = info;
 }
 function nl2br(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/\n/g,'<br>'); }
-
 function nextTopic() { if (!S.topics.length) return; S.temaIdx = (S.temaIdx + 1) % S.topics.length; renderLiveTopic(); }
 function prevTopic() { if (!S.topics.length) return; S.temaIdx = (S.temaIdx - 1 + S.topics.length) % S.topics.length; renderLiveTopic(); }
-function randomTopic() {
+
+// ===== RANDOM (no repeats) =====
+function randomQuestion() {
   if (S.randomQuestions.length === 0) return;
-  const idx = Math.floor(Math.random() * S.randomQuestions.length);
-  const q = S.randomQuestions[idx];
-  document.getElementById('liveTopicTitle').textContent = '🎲 Pregunta al azar';
-  document.getElementById('liveTopicInfo').innerHTML = `<span style="font-size:1.2rem;">${nl2br(q)}</span>`;
+  // Get remaining questions
+  const remaining = S.randomQuestions.filter((_, i) => !S.randomUsed.includes(i));
+  if (remaining.length === 0) {
+    // All used — reset
+    S.randomUsed = [];
+    return randomQuestion();
+  }
+  // Pick a random one from remaining
+  const availableIndices = S.randomQuestions.map((_, i) => i).filter(i => !S.randomUsed.includes(i));
+  const pick = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+  S.randomUsed.push(pick);
+
+  const q = S.randomQuestions[pick];
+  document.getElementById('liveTopicTitle').textContent = `🎲 Pregunta al azar`;
+  document.getElementById('liveTopicInfo').innerHTML = `<span style="font-size:1.15rem;color:var(--text-primary);">${nl2br(q)}</span>
+    <br><span style="font-size:0.7rem;color:var(--text-tertiary);margin-top:8px;display:inline-block;">${S.randomUsed.length} / ${S.randomQuestions.length} usadas</span>`;
 }
 
-// ===== QUESTIONS =====
+// ===== AUDIENCE QUESTIONS =====
 function initQR() {
   const baseUrl = window.location.href.replace(/\/[^\/]*$/, '/preguntas.html');
   document.getElementById('qrCode').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(baseUrl)}&bgcolor=ffffff&color=1a0800`;
@@ -575,9 +623,7 @@ async function fetchQuestions() {
     const qs = await supa(`questions?visible=eq.true&created_at=gte.${liveStartTime}&order=created_at.desc&limit=15`);
     const feed = document.getElementById('questionsFeed');
     const currentIds = new Set(qs.map(q => q.id));
-    // Remove hidden
     feed.querySelectorAll('.q-item').forEach(el => { if (!currentIds.has(el.dataset.id)) el.remove(); });
-    // Add new
     qs.slice().reverse().forEach(q => {
       if (knownQIds.has(q.id)) return;
       knownQIds.add(q.id);
@@ -600,16 +646,15 @@ document.addEventListener('keydown', e => {
     case ' ': e.preventDefault(); toggleTimer(); break;
     case 'ArrowRight': nextTopic(); break;
     case 'ArrowLeft': prevTopic(); break;
-    case 'r': case 'R': randomTopic(); break;
+    case 'r': case 'R': randomQuestion(); break;
     case 'Escape': exitLive(); break;
   }
 });
 
 // ===== INIT =====
 if (sessionStorage.getItem('cafe_auth') === '1') {
-  loadData().then(() => showView('adminView')).catch(e => { console.error('Init error:', e); showView('adminView'); });
+  loadData().then(() => showView('adminView')).catch(() => showView('adminView'));
 }
-updateTimer();
 </script>
 </body>
 </html>
