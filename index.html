@@ -157,18 +157,18 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; colo
 .live-dot { width: 8px; height: 8px; background: #ff453a; border-radius: 50%; animation: livePulse 2s ease-in-out infinite; }
 @keyframes livePulse { 0%,100%{ opacity:1; transform:scale(1); } 50%{ opacity:0.6; transform:scale(0.85); } }
 
-.live-body { flex: 1; display: grid; grid-template-columns: 1fr 260px; height: 100%; }
+.live-body { flex: 1; display: grid; grid-template-columns: 1fr 260px; height: 100%; overflow: hidden; }
 .live-center {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; padding: 60px 40px 40px;
-  gap: 20px;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  text-align: center; padding: 60px 40px 30px;
+  gap: 16px; overflow-y: auto;
 }
 
 .timer {
-  font-size: clamp(7rem, 20vw, 16rem);
+  font-size: clamp(5rem, 14vw, 12rem);
   font-weight: 800; font-variant-numeric: tabular-nums;
-  letter-spacing: -6px; line-height: 0.9;
-  transition: color 0.5s ease;
+  letter-spacing: -5px; line-height: 0.9;
+  transition: color 0.5s ease; flex-shrink: 0;
 }
 .timer.green { color: var(--text-primary); }
 .timer.yellow { color: #ffd60a; }
@@ -196,6 +196,7 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; colo
   background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--glass-border); border-radius: var(--radius);
   box-shadow: var(--shadow);
+  overflow-y: auto; flex-shrink: 1; min-height: 0;
 }
 .live-topic-title { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 10px; }
 .live-topic-info { font-size: 0.88rem; color: var(--text-secondary); line-height: 1.65; }
