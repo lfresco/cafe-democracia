@@ -16,7 +16,7 @@ body {
 
 /* ===== VIEWS ===== */
 .view { display: none; height: 100vh; flex-direction: column; }
-.view.active { display: flex; }
+.view.active { display: flex !important; }
 
 /* ===== LOGIN ===== */
 #loginView { align-items: center; justify-content: center; }
@@ -479,16 +479,19 @@ let questionsInterval = null;
 let knownQIds = new Set();
 
 function goLive() {
-  S.timerRemaining = S.timerTotal;
-  S.temaIdx = 0;
-  updateTimer();
-  renderLiveTopic();
-  initQR();
-  liveStartTime = new Date().toISOString();
-  knownQIds = new Set();
-  document.getElementById('questionsFeed').innerHTML = '';
-  questionsInterval = setInterval(fetchQuestions, 5000);
-  showView('liveView');
+  try {
+    S.timerTotal = parseInt(document.getElementById('adminTimer').value) || 180;
+    S.timerRemaining = S.timerTotal;
+    S.temaIdx = 0;
+    updateTimer();
+    renderLiveTopic();
+    initQR();
+    liveStartTime = new Date().toISOString();
+    knownQIds = new Set();
+    document.getElementById('questionsFeed').innerHTML = '';
+    questionsInterval = setInterval(fetchQuestions, 5000);
+    showView('liveView');
+  } catch(e) { console.error('goLive error:', e); alert('Error: ' + e.message); }
 }
 
 function exitLive() {
@@ -583,7 +586,7 @@ document.addEventListener('keydown', e => {
 
 // ===== INIT =====
 if (sessionStorage.getItem('cafe_auth') === '1') {
-  loadData().then(() => showView('adminView'));
+  loadData().then(() => showView('adminView')).catch(e => { console.error('Init error:', e); showView('adminView'); });
 }
 updateTimer();
 </script>
