@@ -10,7 +10,7 @@
 html, body { height: 100%; overflow: hidden; }
 body {
   font-family: 'Inter', sans-serif;
-  background: linear-gradient(160deg, #e8752c 0%, #d4601a 30%, #b84a10 60%, #1a0800 100%);
+  background: transparent;
   color: #fff;
 }
 
@@ -184,6 +184,7 @@ body {
 /* Custom background */
 .custom-bg {
   position: fixed; inset: 0; z-index: -1;
+  background: linear-gradient(160deg, #e8752c 0%, #d4601a 30%, #b84a10 60%, #1a0800 100%);
   background-size: cover; background-position: center; background-repeat: no-repeat;
 }
 </style>
@@ -234,6 +235,10 @@ body {
 
       <h2 style="margin-top:18px;">Timer (segundos por defecto)</h2>
       <input type="number" id="adminTimer" value="180" style="width:100px" oninput="debounceSave()">
+
+      <h2 style="margin-top:18px;">🎲 Preguntas random</h2>
+      <label>Una pregunta por línea (se extraerá una al azar en vivo)</label>
+      <textarea id="adminRandom" rows="6" oninput="debounceSave()"></textarea>
     </div>
 
     <!-- DESIGN -->
@@ -317,6 +322,7 @@ const S = {
   speakers: [],
   rules: [],
   topics: [],
+  randomQuestions: [],
   design: { bgColor1: '#e8752c', bgColor2: '#1a0800', textColor: '#ffffff', bgImage: '', overlay: 0 },
   temaIdx: 0,
   timerTotal: 180,
@@ -366,6 +372,12 @@ async function loadData() {
   S.topics = await supa(`topics?debate_id=eq.${S.debateId}&order=position`);
   S.temaIdx = 0;
 
+  // Load random questions
+  try {
+    const rqs = await supa(`random_questions?debate_id=eq.${S.debateId}&order=created_at`);
+    S.randomQuestions = rqs.map(r => r.text);
+  } catch(e) { S.randomQuestions = []; }
+
   // Load design
   try {
     const dRes = await supa("settings?key=eq.design&select=value");
@@ -380,6 +392,7 @@ async function loadData() {
 function renderAdmin() {
   document.getElementById('adminSpeakers').value = S.speakers.join('\n');
   document.getElementById('adminRules').value = S.rules.join('\n');
+  document.getElementById('adminRandom').value = S.randomQuestions.join('\n');
   document.getElementById('adminTimer').value = S.timerTotal;
   document.getElementById('colBg1').value = S.design.bgColor1 || '#e8752c';
   document.getElementById('colBg2').value = S.design.bgColor2 || '#1a0800';
@@ -425,6 +438,7 @@ async function saveAll() {
   // Read admin fields
   S.speakers = document.getElementById('adminSpeakers').value.trim().split('\n').filter(Boolean);
   S.rules = document.getElementById('adminRules').value.trim().split('\n').filter(Boolean);
+  S.randomQuestions = document.getElementById('adminRandom').value.trim().split('\n').filter(Boolean);
   S.timerTotal = parseInt(document.getElementById('adminTimer').value) || 180;
   S.design.bgColor1 = document.getElementById('colBg1').value;
   S.design.bgColor2 = document.getElementById('colBg2').value;
@@ -436,6 +450,11 @@ async function saveAll() {
     await fetch(`${SUPA_URL}/rest/v1/topics?debate_id=eq.${S.debateId}`, { method: 'DELETE', headers: hdrs });
     if (S.topics.length > 0) {
       await supa('topics', { method: 'POST', body: JSON.stringify(S.topics.map((t,i) => ({ debate_id: S.debateId, position: i, title: t.title||'', context: t.context||'', questions: t.questions||'', data: t.data||'' }))) });
+    }
+    // Save random questions
+    await fetch(`${SUPA_URL}/rest/v1/random_questions?debate_id=eq.${S.debateId}`, { method: 'DELETE', headers: hdrs });
+    if (S.randomQuestions.length > 0) {
+      await supa('random_questions', { method: 'POST', body: JSON.stringify(S.randomQuestions.map(text => ({ debate_id: S.debateId, text }))) });
     }
     // Save design
     await fetch(`${SUPA_URL}/rest/v1/settings?key=eq.design`, { method: 'DELETE', headers: hdrs });
@@ -452,11 +471,13 @@ function applyDesign() {
   const d = S.design;
   const bgEl = document.getElementById('customBg');
   if (d.bgImage) {
-    bgEl.style.backgroundImage = `url(${d.bgImage})`;
-    document.body.style.background = `linear-gradient(rgba(0,0,0,${(d.overlay||0)/100}), rgba(0,0,0,${(d.overlay||0)/100}))`;
+    bgEl.style.backgroundImage = `linear-gradient(rgba(0,0,0,${(d.overlay||0)/100}), rgba(0,0,0,${(d.overlay||0)/100})), url(${d.bgImage})`;
+    bgEl.style.backgroundSize = 'cover';
+    bgEl.style.backgroundPosition = 'center';
   } else {
-    bgEl.style.backgroundImage = '';
-    document.body.style.background = `linear-gradient(160deg, ${d.bgColor1||'#e8752c'} 0%, ${d.bgColor2||'#1a0800'} 100%)`;
+    bgEl.style.backgroundImage = `linear-gradient(160deg, ${d.bgColor1||'#e8752c'} 0%, ${d.bgColor2||'#1a0800'} 100%)`;
+    bgEl.style.backgroundSize = '';
+    bgEl.style.backgroundPosition = '';
   }
   if (d.textColor) document.body.style.color = d.textColor;
 }
@@ -536,11 +557,11 @@ function nl2br(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').re
 function nextTopic() { if (!S.topics.length) return; S.temaIdx = (S.temaIdx + 1) % S.topics.length; renderLiveTopic(); }
 function prevTopic() { if (!S.topics.length) return; S.temaIdx = (S.temaIdx - 1 + S.topics.length) % S.topics.length; renderLiveTopic(); }
 function randomTopic() {
-  if (S.topics.length <= 1) return;
-  let idx;
-  do { idx = Math.floor(Math.random() * S.topics.length); } while (idx === S.temaIdx);
-  S.temaIdx = idx;
-  renderLiveTopic();
+  if (S.randomQuestions.length === 0) return;
+  const idx = Math.floor(Math.random() * S.randomQuestions.length);
+  const q = S.randomQuestions[idx];
+  document.getElementById('liveTopicTitle').textContent = '🎲 Pregunta al azar';
+  document.getElementById('liveTopicInfo').innerHTML = `<span style="font-size:1.2rem;">${nl2br(q)}</span>`;
 }
 
 // ===== QUESTIONS =====
